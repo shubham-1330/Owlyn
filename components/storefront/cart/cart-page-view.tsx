@@ -48,11 +48,11 @@ export function CartPageView() {
         <CouponForm idPrefix="page-coupon" />
         <CartSummary cart={view} />
         <div className="flex flex-col gap-2">
-          <Button size="lg" disabled title="Checkout opens in the next release">
-            Checkout
+          <Button size="lg" asChild>
+            <Link href="/checkout">Checkout</Link>
           </Button>
           <p className="text-center text-xs text-muted-foreground">
-            Checkout opens in the next release.
+            Shipping is confirmed at checkout once we know your pincode.
           </p>
         </div>
       </aside>

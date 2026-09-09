@@ -77,15 +77,14 @@ export function CartDrawer() {
             <div className="shrink-0 border-t border-border bg-slate px-5 py-4">
               <CartSummary cart={view} />
               <div className="mt-4 flex flex-col gap-2">
-                <Button size="lg" disabled title="Checkout opens in the next release">
-                  Checkout
+                <Button size="lg" asChild>
+                  <Link href="/checkout" onClick={() => cart.setOpen(false)}>
+                    Checkout
+                  </Link>
                 </Button>
                 <Button asChild variant="outline">
                   <Link href="/cart">View bag</Link>
                 </Button>
-                <p className="text-center text-xs text-muted-foreground">
-                  Checkout opens in the next release.
-                </p>
               </div>
             </div>
           ) : null}
