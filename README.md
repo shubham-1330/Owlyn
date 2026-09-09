@@ -89,22 +89,27 @@ Set `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` from a Google Cloud OAuth client w
 
 ```
 app/
-  globals.css           Design tokens and base styles
+  globals.css           Design tokens, motion tokens, base styles
   layout.tsx            Root layout, fonts, metadata
+  not-found.tsx         404 page
   (auth)/               Login and register pages plus their server actions
-  (storefront)/         Customer-facing routes (account for now)
+  (storefront)/         Header + footer layout, home, /pages/[slug], /search, /cart, /account
   admin/                Admin dashboard, light theme, staff-only
   api/auth/             Auth.js route handler
 components/
   ui/                   shadcn primitives restyled to Owlyn
   forms/                Field and message helpers shared by forms
-  storefront/           Storefront components
+  storefront/           Header (mega menu, drawer, search), footer, product card and rail, home sections, Markdown
+  seo/                  JSON-LD helper
   admin/                Admin components (Phase 7)
+hooks/                  Client hooks (recent searches)
 lib/
   auth.config.ts        Edge-safe Auth.js config (used by middleware)
   auth.ts               Full Auth.js config with Prisma adapter and credentials
   auth/                 Password hashing, guards, safe redirect helper
+  cache.ts              Tagged data-cache wrapper for queries
   db.ts                 Prisma client singleton
+  queries/              Read models for menus, settings, home sections, banners, products, pages, search
   money.ts, tax.ts, shipping.ts   Pure business logic with unit tests
   validations/          Zod schemas shared by client and server
 middleware.ts           Protects /account and /admin, bounces signed-in users off /login
@@ -116,6 +121,17 @@ types/                  Auth.js type augmentation
 tests/                  Playwright e2e (Phase 9)
 public/images/          Generated SVG placeholders (see ASSETS.md)
 ```
+
+## Content model
+
+The storefront reads its structure from the database, so the admin (Phase 7) can change it without a deploy:
+
+- **Navigation**: `MenuItem` rows in the `main` menu become the mega menu and the mobile drawer. Children grouped by `group` become link columns; children in the `tiles` group become image tiles. Three `footer-*` menus feed the footer.
+- **Home page**: `HomepageSection` rows set the order and per-section config; `Banner` rows fill the hero, the collection block and the editorial split, honouring their schedule windows.
+- **Pages**: `Page` rows render at `/pages/[slug]` from GitHub-flavoured Markdown, sanitised on the server. Full MDX is deliberately not supported.
+- **Settings**: `Setting` rows drive the trust strip, footer, trending searches and store contact details.
+
+Reads go through `lib/queries/` and are cached with tags, so a publish can call `revalidateTag` on exactly what changed.
 
 ## Conventions
 

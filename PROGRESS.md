@@ -1,81 +1,73 @@
 # Progress
 
-## Phase 1: Data & auth (done)
+## Phase 2: Storefront shell (done)
 
-### Data
+### Design review before building
 
-- `prisma/schema.prisma`: 49 tables covering everything in CLAUDE.md section 4 plus what later phases need: order events for the timeline, stock reservations, back-in-stock requests, product relations for "complete the look", a pincode directory, menu items, homepage sections, customer notes, one-time auth tokens and the Auth.js adapter tables.
-- Single init migration. Hand-written additions at the end of the SQL: a trigger that maintains `Product.searchVector` (weighted name, brand line, short and long copy), and a sequence for order numbers in the form `OWL-2026-000123`. Prisma owns the GIN full-text index and the trigram index on product names, so `prisma migrate dev` reports zero drift.
-- Seed (`pnpm db:seed`, idempotent):
+Token plan checked against CLAUDE.md section 3 before any component was written:
 
-  | Entity         | Count                                                                 |
-  | -------------- | --------------------------------------------------------------------- |
-  | Categories     | 32 (Men and Women → Footwear, Clothing, Accessories → 12 leaves each) |
-  | Collections    | 3 (Night Run, Court Edit, Cold Start)                                 |
-  | Products       | 40 across five brand lines: Hush, Boom, Quill, Talon, Seam, Roost     |
-  | Variants       | 454 (size × colour, stable SKUs, deterministic stock)                 |
-  | Product images | 170 generated SVGs                                                    |
-  | Users          | 3 (admin, staff, customer with two addresses)                         |
-  | Coupons        | 7 (all four rule types, one expired, one inactive)                    |
-  | Shipping       | 3 zones, 4 rates, 32 pincodes                                         |
-  | CMS pages      | 9                                                                     |
-  | Banners        | 5 (one scheduled for the future)                                      |
-  | Menu items     | 58 across main and three footer menus                                 |
-  | Settings       | 18                                                                    |
+- Ink ground, moon text, brass only for the primary CTA, the count badge and small icon accents. Dusk appears on tiles and badges, never as a wash.
+- Header is fixed and transparent over the hero, solid slate when the hero scrolls past, when a menu, drawer or the search overlay is open, or when the pointer is over it. A functional scrim keeps header and headline legible over imagery.
+- Sections are separated by whitespace (`py-16` to `py-24`), not rules. The only borders are the footer's top rule and form controls.
+- Images are 3:4 for products and 4:5 for tiles with zero radius. Controls stay at 2px. The bag count badge is a 1px-radius square, not a pill.
+- Headings are Archivo at 112% stretch in sentence case. Group labels in menus are muted sentence-case text, never tracked caps. Links have no arrows. Prices use tabular numerals.
+- Motion only on user action: the mega menu, drawer and search overlay animate in; nothing animates on scroll. Reduced-motion users get the poster image and no transitions.
 
-- Business logic in `lib/`: `money.ts` (paise), `tax.ts` (GST by HSN chapter and price threshold, inclusive tax back-out, CGST/SGST split), `shipping.ts` (longest-prefix zone match, rate calculation), `slug.ts`. 20 unit tests pass.
+### Built
 
-### Auth
+- **Layout**: `app/(storefront)/layout.tsx` with skip link, fixed header, main offset by the header height, footer. Auth pages keep their own quiet layout.
+- **Header** (`components/storefront/header/`): server half loads the menu, session and bag/wishlist counts; client shell handles overlay state. Mega menu on Radix NavigationMenu with three sentence-case columns and two image tiles per panel, all from `MenuItem` rows. Mobile drawer on Radix Dialog with a two-level back stack. Search overlay with trending searches from settings and recent searches in localStorage.
+- **Home** (`app/(storefront)/page.tsx`): sections render in `HomepageSection` order, each streamed inside its own Suspense boundary: hero banner (video-capable, poster fallback, reduced-motion aware), featured rail, category tiles, Cold Start collection block with four products, new-this-week rail, Men and Women editorial split, newsletter form, trust strip. Organization and WebSite JSON-LD with a SearchAction.
+- **Footer** from the three seeded footer menus plus store settings.
+- **CMS pages** at `/pages/[slug]`: Markdown (GitHub flavoured) through rehype-sanitize with Owlyn typography, HTML comments stripped server-side. The contact page carries a working contact form that files `SupportTicket` rows.
+- **Search** at `/search`: full-text on the weighted vector, widened by trigram similarity and substring match, ranked by relevance then sales. Loading skeleton and empty state included.
+- **Bag** (`/cart`) and **wishlist** (`/account/wishlist`) pages read real rows with empty states so header links resolve. Mutations arrive in Phases 4 and 6.
+- **Not-found** and a storefront error boundary.
+- **Query layer** in `lib/queries/` wrapped in `unstable_cache` with tags (`home`, `products`, `banners`, `menus`, `settings`, `pages`, `collections`) so admin publishes can call `revalidateTag`. Cached results are JSON-safe by construction.
+- **Seed additions**: menu image tiles, section configs for tiles, collection block and editorial split, trending searches. Tile and banner placeholders are now colour and shape only because the components render their own labels.
 
-- Auth.js v5 with JWT sessions. `lib/auth.config.ts` is edge-safe for middleware; `lib/auth.ts` adds the Prisma adapter and an argon2id credentials provider. Google is enabled only when its env vars exist.
-- The JWT re-reads role and ban state from the database every five minutes, so demotions and bans take effect without waiting for expiry.
-- `lib/auth/guards.ts`: `requireUser`, `requireRole`, `requireStaff`, `requireAdmin`. Non-staff hitting `/admin` get a 404 from the guard and a redirect home from middleware.
-- Pages: `/login`, `/register` (server actions, Zod validation, inline field errors, pending state, safe `next` redirect), `/account` (real profile data, sign out), `/admin` (light theme shell with live counts).
+### Verified in a browser against the running app
 
-### Verified
-
-- `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` all pass.
-- Seed run twice produces identical counts.
-- Full-text query "running shoe soft" ranks Talon Circuit and Boom Strider 3 first; trigram search finds "Boom Strider 3" from the typo "strdier".
-- Browser check against the production build: wrong password shows an inline error, the customer lands on `/account`, a customer is bounced from `/admin`, the admin sees the overview, and `/account` while signed out redirects to `/login?next=/account`.
+- Home renders all eight sections from seed data at 1280px and 390px with no horizontal overflow; the headline is 96px on desktop and 40px on a phone.
+- Header: transparent at the top of the home page, solid after scrolling past the hero, transparent again on return.
+- Mega menu opens on hover with the full-width panel, three columns and two tiles.
+- Search overlay submits to `/search`, stores the term locally, and the results page ranks Boom Strider 3 first for "strider".
+- Mobile drawer opens, drills into Women, returns with Back, closes on Escape.
+- Contact page: empty submit shows four inline errors with `aria-invalid`; a filled submit stores a ticket with the phone normalised and the order number upper-cased.
+- Newsletter form stores a subscriber with `source=home`.
+- `/cart` shows the empty state, `/account/wishlist` redirects to login when signed out, unknown routes show the Owlyn 404.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (20 tests) and `pnpm build` pass.
 
 ### Decisions worth knowing
 
-- **Search column is trigger-maintained, not generated.** Prisma's diff engine reads a generated column's expression as a default and tries to drop it on every `migrate dev`. A `BEFORE INSERT OR UPDATE` trigger is invisible to Prisma and gives the same result.
-- **`@auth/core` is a direct dependency.** `next-auth/jwt` star-re-exports the `JWT` type, and TypeScript cannot merge an augmentation through a star export. Augmenting `@auth/core/jwt` works, so the package is pinned at the exact version next-auth uses.
-- **Google account linking is on.** Google verifies email ownership, so a Google sign-in with an email that already has a password account links to it instead of failing.
-- **GST** follows the schedule in force from 22 September 2025: apparel, footwear and headgear 5% at or under ₹2,500, 18% above; bags 18%. Rates are stored per product and recomputed by the seed.
-- **Prisma reset needs a human.** The Prisma CLI refuses `migrate reset` when driven by an agent. During this phase the empty dev schema was dropped with psql instead; `pnpm db:reset` works normally from a terminal.
-- **Menu links to virtual collections** (`/collections/new`, `bestsellers`, `footwear`, `clothing`, `accessories`) are resolved by the PLP in Phase 3 alongside real category and collection slugs.
+- **Markdown, not MDX, for CMS bodies.** MDX would let an admin-authored page execute JSX. GitHub-flavoured Markdown through rehype-sanitize covers headings, lists, tables and links and cannot run code. Added `react-markdown` and `remark-gfm` alongside the spec's `rehype-sanitize` for this.
+- **Mega menu panel is `position: fixed`** under the header. Radix wraps the menu list in a relatively positioned element, which would otherwise clip the panel to the width of the nav.
+- **Header overlay detection** uses an IntersectionObserver on the `[data-hero]` element with a negative top margin equal to the header height, so any page with a hero gets the transparent treatment without props.
+- **Product and collection links** point at `/products/[slug]` and `/collections/[slug]`, which Phase 3 builds. Until then they 404 and Next logs prefetch misses in the console.
+
+## Phase 1: Data & auth (done)
+
+- 49-table Prisma schema, single init migration with a trigger-maintained search vector, GIN and trigram indexes, and an order-number sequence. Zero drift.
+- Idempotent seed: 32 categories, 3 collections, 40 products with 454 variants and generated placeholders, 3 users, 7 coupons, 3 zones, 32 pincodes, 9 pages, 5 banners, 64 menu items, 19 settings.
+- Auth.js v5 with JWT sessions, argon2id credentials, optional Google, periodic role re-check, server-side guards, middleware for `/account` and `/admin`, login and register pages, account page, admin shell.
+- Decisions: trigger over generated column (Prisma diff), `@auth/core` as a direct dependency for JWT type augmentation, Google account linking on, GST per the September 2025 schedule, Prisma reset needs a human.
 
 ## Phase 0: Foundation (done)
 
-- Next.js 15.5 + React 19 + TypeScript strict, scaffolded by hand so versions match the spec (the current `create-next-app` targets Next 16).
-- Tailwind CSS v4 with Owlyn tokens in `app/globals.css`, `.theme-admin` for the light admin, 12 to 96 type scale, 2px radius on controls.
-- Fonts via `next/font`: Archivo with the width axis, Inter Tight.
-- shadcn/ui on the `radix-ui` package; button, input, label, badge, separator restyled.
-- ESLint 9 flat config, Prettier with the Tailwind sorter, Vitest, Docker Compose for Postgres on 5436.
-- `app/page.tsx` is a token sheet for reviewing palette, type and controls. Phase 2 replaces it.
+- Next.js 15.5, React 19, TypeScript strict, Tailwind v4 tokens, shadcn on Radix restyled, Archivo and Inter Tight, ESLint 9, Prettier, Vitest, Docker Compose for Postgres on port 5436.
+- Tagline picked: "For the hours nobody sees."
 
-### Tagline
+## Phase 3: Catalog (next)
 
-Direction given: "Built for the hours nobody sees." Alternatives considered:
-
-1. For the hours nobody sees.
-2. Made before sunrise.
-3. Quiet work, done right.
-
-Picked **1**.
-
-## Phase 2: Storefront shell (next)
-
-- Layout, header with mega menu driven by `MenuItem`, mobile drawer, footer, home page sections driven by `HomepageSection` and `Banner`, CMS pages at `/pages/[slug]`.
-- Design review against CLAUDE.md section 3 before writing components.
+- `/collections/[slug]` PLP shared by categories, collections and the virtual slugs the menu already links to (`new`, `bestsellers`, `footwear`, `clothing`, `caps`, `accessories`, `men`, `women`), with URL-driven filters, sort and pagination.
+- `/products/[slug]` PDP with gallery, colour and size selection, size guide, back-in-stock, delivery estimate, related rails, JSON-LD.
+- Search page grows filters and trending queries from real search logs.
+- `sitemap.xml`, `robots.txt`, breadcrumbs.
 
 ## Known gaps
 
-- `/forgot-password`, `/reset-password` and `/verify-email` wait for the email layer (Phase 5 introduces Resend; Phase 8 wires the flows). The `AuthToken` model is ready for them.
-- No rate limiting on login or register until Phase 9.
-- Phone OTP sign-in is modelled (`phone`, `phoneVerified`, `AuthToken.PHONE_OTP`) but has no provider yet.
-- The home route is still the Phase 0 token sheet.
-- Playwright is installed but has no tests until Phase 9.
+- Product and collection routes 404 until Phase 3.
+- No hero video asset yet; the slot renders the poster image.
+- Newsletter double opt-in email and the contact acknowledgement email wait for Phase 8.
+- Password reset, email verification and rate limiting are unchanged from Phase 1's gaps.
+- The demo database now holds one support ticket and one newsletter subscriber from the Phase 2 browser checks.
