@@ -22,7 +22,8 @@ import { products, sizesFor, type ProductSeed, type StockPattern } from "./seed/
 import { pincodes, zones } from "./seed/data/shipping";
 import { sizeCharts } from "./seed/data/size-charts";
 import { users } from "./seed/data/users";
-import { productSvg, tileSvg, writeSvg } from "./seed/lib/placeholders";
+import { blurDataUri, productSvg, tileSvg, writeSvg } from "./seed/lib/placeholders";
+import { reviewers, reviews } from "./seed/data/reviews";
 import { createRandom } from "./seed/lib/random";
 
 const db = new PrismaClient();
@@ -345,6 +346,7 @@ async function seedProduct(p: ProductSeed, ids: CatalogIds) {
           alt: `${p.name} in ${color.name}${view === 2 ? ", detail" : ""}`,
           width: 900,
           height: 1200,
+          blurData: blurDataUri(color.hex),
           position: imagePosition,
           isPrimary: imagePosition === 0,
         },
@@ -584,6 +586,59 @@ async function seedContent() {
   return { banners: banners.length, menuItems: menuCount, sections: homepageSections.length };
 }
 
+async function seedReviews(productIds: Map<string, string>) {
+  const reviewerIds = new Map<string, string>();
+  for (const r of reviewers) {
+    const user = await db.user.upsert({
+      where: { email: r.email },
+      update: { name: r.name },
+      create: { email: r.email, name: r.name, role: "CUSTOMER", emailVerified: now },
+    });
+    reviewerIds.set(r.key, user.id);
+  }
+
+  let count = 0;
+  for (const r of reviews) {
+    const productId = productIds.get(r.product);
+    const userId = reviewerIds.get(r.reviewer);
+    if (!productId || !userId) {
+      throw new Error(`Review references unknown product ${r.product} or reviewer ${r.reviewer}`);
+    }
+    const id = `seed-review-${r.product}-${r.reviewer}`;
+    const data = {
+      productId,
+      userId,
+      rating: r.rating,
+      title: r.title,
+      body: r.body,
+      status: "APPROVED" as const,
+      isVerifiedPurchase: r.verified ?? false,
+      helpfulCount: r.helpful ?? 0,
+      createdAt: daysFromNow(-r.daysAgo),
+      reply: r.reply ?? null,
+      repliedAt: r.reply ? daysFromNow(-r.daysAgo + 2) : null,
+    };
+    await db.review.upsert({ where: { id }, update: data, create: { id, ...data } });
+    count += 1;
+  }
+
+  // Denormalised rating counters, recomputed from scratch so re-runs stay exact.
+  const aggregates = await db.review.groupBy({
+    by: ["productId"],
+    where: { status: "APPROVED" },
+    _count: { _all: true },
+    _sum: { rating: true },
+  });
+  await db.product.updateMany({ data: { reviewCount: 0, ratingSum: 0 } });
+  for (const a of aggregates) {
+    await db.product.update({
+      where: { id: a.productId },
+      data: { reviewCount: a._count._all, ratingSum: a._sum.rating ?? 0 },
+    });
+  }
+  return count;
+}
+
 // ---------------------------------------------------------------------------
 
 async function main() {
@@ -608,6 +663,7 @@ async function main() {
     imageCount += result.images;
   }
   const relationCount = await seedProductRelations(productIds);
+  const reviewCount = await seedReviews(productIds);
   const couponCount = await seedCoupons(ids);
   const shipping = await seedShipping();
   const pageCount = await seedPages();
@@ -652,6 +708,7 @@ async function main() {
     variants: variantCount,
     images: imageCount,
     productRelations: relationCount,
+    reviews: reviewCount,
     coupons: couponCount,
     shippingZones: shipping.zones,
     shippingRates: shipping.rates,

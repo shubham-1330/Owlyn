@@ -13,7 +13,8 @@ export const productCardSelect = {
   compareAtPrice: true,
   badges: true,
   images: {
-    select: { url: true, alt: true },
+    where: { kind: "IMAGE" },
+    select: { url: true, alt: true, blurData: true },
     orderBy: { position: "asc" },
     take: 2,
   },
@@ -33,7 +34,7 @@ export type ProductCardData = {
   price: number;
   compareAtPrice: number | null;
   badges: ProductBadge[];
-  images: Array<{ url: string; alt: string }>;
+  images: Array<{ url: string; alt: string; blurData?: string | null }>;
   inStock: boolean;
   colorCount: number;
 };

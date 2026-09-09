@@ -85,6 +85,8 @@ Set `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` from a Google Cloud OAuth client w
 | `pnpm db:reset`   | Drop, migrate and seed                           |
 | `pnpm db:studio`  | Prisma Studio                                    |
 
+One-off: `pnpm exec tsx scripts/explain-catalog.ts` prints `EXPLAIN ANALYZE` for the heaviest listing query.
+
 ## Project layout
 
 ```
@@ -93,13 +95,15 @@ app/
   layout.tsx            Root layout, fonts, metadata
   not-found.tsx         404 page
   (auth)/               Login and register pages plus their server actions
-  (storefront)/         Header + footer layout, home, /pages/[slug], /search, /cart, /account
+  (storefront)/         Header + footer layout, home, /collections/[slug], /products/[slug], /search, /pages/[slug], /cart, /account
   admin/                Admin dashboard, light theme, staff-only
   api/auth/             Auth.js route handler
 components/
   ui/                   shadcn primitives restyled to Owlyn
   forms/                Field and message helpers shared by forms
-  storefront/           Header (mega menu, drawer, search), footer, product card and rail, home sections, Markdown
+  storefront/           Header, footer, product card and rail, home sections, Markdown, breadcrumbs
+    plp/                Filters, chips, sort, grid with load more, pagination
+    pdp/                Gallery, product view, notify form, size guide, delivery estimator, reviews
   seo/                  JSON-LD helper
   admin/                Admin components (Phase 7)
 hooks/                  Client hooks (recent searches)
@@ -108,8 +112,12 @@ lib/
   auth.ts               Full Auth.js config with Prisma adapter and credentials
   auth/                 Password hashing, guards, safe redirect helper
   cache.ts              Tagged data-cache wrapper for queries
+  catalog/              Listing scope resolution and the single-statement catalog query
+  search-params.ts      The one parser and serialiser for listing URLs
+  rate-limit.ts         Sliding-window limiter (Upstash or in-memory)
+  delivery.ts           Delivery window maths
   db.ts                 Prisma client singleton
-  queries/              Read models for menus, settings, home sections, banners, products, pages, search
+  queries/              Read models for menus, settings, home, banners, products, product detail, categories, collections, shipping, pages
   money.ts, tax.ts, shipping.ts   Pure business logic with unit tests
   validations/          Zod schemas shared by client and server
 middleware.ts           Protects /account and /admin, bounces signed-in users off /login
@@ -129,7 +137,8 @@ The storefront reads its structure from the database, so the admin (Phase 7) can
 - **Navigation**: `MenuItem` rows in the `main` menu become the mega menu and the mobile drawer. Children grouped by `group` become link columns; children in the `tiles` group become image tiles. Three `footer-*` menus feed the footer.
 - **Home page**: `HomepageSection` rows set the order and per-section config; `Banner` rows fill the hero, the collection block and the editorial split, honouring their schedule windows.
 - **Pages**: `Page` rows render at `/pages/[slug]` from GitHub-flavoured Markdown, sanitised on the server. Full MDX is deliberately not supported.
-- **Settings**: `Setting` rows drive the trust strip, footer, trending searches and store contact details.
+- **Settings**: `Setting` rows drive the trust strip, footer, trending searches, delivery cut-off and store contact details.
+- **Listings**: `/collections/[slug]` resolves a category (with its subtree), a live collection, a virtual listing (`new`, `bestsellers`, `sale`, `all`) or a cross-gender type (`footwear`, `sneakers`). Filter state lives in the URL and is parsed by `lib/search-params.ts`; the search page shares it.
 
 Reads go through `lib/queries/` and are cached with tags, so a publish can call `revalidateTag` on exactly what changed.
 

@@ -39,6 +39,8 @@ export function ProductCard({
             fill
             sizes={sizes}
             priority={priority}
+            placeholder={first.blurData ? "blur" : "empty"}
+            blurDataURL={first.blurData ?? undefined}
             className={cn(
               "object-cover",
               second && "md:transition-opacity md:duration-200 md:group-hover:opacity-0",

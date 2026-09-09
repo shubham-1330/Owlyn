@@ -124,3 +124,10 @@ export function tileSvg({ title, width, height, bg, accent }: TileSvgInput): str
 </svg>
 `;
 }
+
+/** A tiny inline SVG in the product colour, used as a blur placeholder while the image loads. */
+export function blurDataUri(hex: string): string {
+  const spot = shade(hex, luminance(hex) > 0.35 ? -0.14 : 0.16);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="6" height="8"><rect width="6" height="8" fill="${hex}"/><circle cx="4" cy="4" r="2.4" fill="${spot}"/></svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}

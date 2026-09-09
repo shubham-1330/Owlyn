@@ -33,6 +33,8 @@
     "@auth/core": "0.41.3",
     "@auth/prisma-adapter": "2.11.3",
     "@prisma/client": "6.19.3",
+    "@upstash/ratelimit": "2.0.8",
+    "@upstash/redis": "1.38.4",
     "argon2": "0.45.1",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",

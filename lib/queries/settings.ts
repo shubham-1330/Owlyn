@@ -12,6 +12,7 @@ export type StoreConfig = {
   address: { line1: string; line2: string; city: string; state: string; pincode: string };
   codLimit: number;
   freeShippingThreshold: number;
+  dispatchCutoffHour: number;
   returnsWindowDays: number;
   warrantyDays: number;
   trendingSearches: string[];
@@ -30,6 +31,7 @@ const DEFAULTS: StoreConfig = {
   address: { line1: "", line2: "", city: "Bengaluru", state: "Karnataka", pincode: "" },
   codLimit: 1_000_000,
   freeShippingThreshold: 199_900,
+  dispatchCutoffHour: 14,
   returnsWindowDays: 7,
   warrantyDays: 90,
   trendingSearches: [],
@@ -83,6 +85,7 @@ export const getStoreConfig = cached(
       },
       codLimit: num(s["checkout.codLimit"], DEFAULTS.codLimit),
       freeShippingThreshold: num(s["shipping.freeThreshold"], DEFAULTS.freeShippingThreshold),
+      dispatchCutoffHour: num(s["shipping.dispatchCutoffHour"], DEFAULTS.dispatchCutoffHour),
       returnsWindowDays: num(s["returns.windowDays"], DEFAULTS.returnsWindowDays),
       warrantyDays: num(s["returns.warrantyDays"], DEFAULTS.warrantyDays),
       trendingSearches: strList(s["search.trending"]),
