@@ -20,9 +20,17 @@
     "db:down": "docker compose down",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@auth/core": "0.41.3",
     "@auth/prisma-adapter": "2.11.3",
     "@prisma/client": "6.19.3",
     "argon2": "0.45.1",
@@ -54,5 +62,8 @@
     "tsx": "4.23.13",
     "typescript": "5.9.3",
     "vitest": "3.2.7"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
