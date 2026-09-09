@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+prisma/migrations
+public
+next-env.d.ts
+CLAUDE.md

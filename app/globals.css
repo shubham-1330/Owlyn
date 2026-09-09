@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------ */
+/*  Owlyn design tokens                                                */
+/*  Brand palette is fixed (see CLAUDE.md §3). Semantic tokens map     */
+/*  the palette onto surfaces. Storefront is dark-first; the admin     */
+/*  dashboard opts into the light palette with `.theme-admin`.         */
+/* ------------------------------------------------------------------ */
+
+:root {
+  /* Brand palette */
+  --ink: #0e1116;
+  --slate: #1b2129;
+  --moon: #f3f4f2;
+  --talon: #c79a4b;
+  --dusk: #46407a;
+  --fog: #8b9199;
+  --alert: #c1462f;
+
+  /* Working tints, the few we allow ourselves */
+  --ink-2: #151a21; /* raised surface between ink and slate */
+  --moon-2: #e6e8e4; /* pressed / hover on moon */
+  --talon-2: #d8ad5e; /* talon hover on dark */
+  --talon-3: #9a7333; /* talon on light surfaces (readable at 4.5:1) */
+  --dusk-2: #6d66a8; /* dusk on dark surfaces */
+  --fog-2: #2a313b; /* borders on dark */
+  --fog-3: #d3d6d2; /* borders on light */
+  --fog-4: #5c636b; /* muted text on light (fog itself fails contrast) */
+  --alert-2: #e06a52; /* alert text on dark (alert itself fails contrast) */
+
+  /* Semantic tokens: storefront (dark) */
+  --background: var(--ink);
+  --foreground: var(--moon);
+  --card: var(--slate);
+  --card-foreground: var(--moon);
+  --popover: var(--slate);
+  --popover-foreground: var(--moon);
+  --primary: var(--talon);
+  --primary-foreground: var(--ink);
+  --secondary: var(--slate);
+  --secondary-foreground: var(--moon);
+  --muted: var(--ink-2);
+  --muted-foreground: var(--fog);
+  --accent: var(--dusk);
+  --accent-foreground: var(--moon);
+  --destructive: var(--alert);
+  --destructive-foreground: var(--moon);
+  --success: #5f9e6e;
+  --border: var(--fog-2);
+  --input: var(--fog-2);
+  --ring: var(--talon);
+  --radius: 2px;
+
+  color-scheme: dark;
+}
+
+/* Admin dashboard: light. Applied on the admin layout wrapper. */
+.theme-admin {
+  --background: var(--moon);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--moon);
+  --secondary: var(--moon-2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--moon-2);
+  --muted-foreground: var(--fog-4);
+  --accent: var(--dusk);
+  --accent-foreground: var(--moon);
+  --destructive: var(--alert);
+  --destructive-foreground: var(--moon);
+  --success: #2f7a44;
+  --border: var(--fog-3);
+  --input: var(--fog-3);
+  --ring: var(--dusk);
+
+  color-scheme: light;
+}
+
+@theme inline {
+  /* Brand colours as utilities: bg-ink, text-talon, border-fog-2 */
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-slate: var(--slate);
+  --color-moon: var(--moon);
+  --color-moon-2: var(--moon-2);
+  --color-talon: var(--talon);
+  --color-talon-2: var(--talon-2);
+  --color-talon-3: var(--talon-3);
+  --color-dusk: var(--dusk);
+  --color-dusk-2: var(--dusk-2);
+  --color-fog: var(--fog);
+  --color-fog-2: var(--fog-2);
+  --color-fog-3: var(--fog-3);
+  --color-fog-4: var(--fog-4);
+  --color-alert: var(--alert);
+  --color-alert-2: var(--alert-2);
+
+  /* Semantic colours (shadcn contract) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Type */
+  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-archivo), var(--font-inter-tight), ui-sans-serif, sans-serif;
+
+  /* Type scale: 12 / 14 / 16 / 20 / 28 / 40 / 64 / 96 */
+  --text-*: initial;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 1.6rem;
+  --text-xl: 1.75rem;
+  --text-xl--line-height: 2rem;
+  --text-2xl: 2.5rem;
+  --text-2xl--line-height: 2.625rem;
+  --text-3xl: 4rem;
+  --text-3xl--line-height: 4rem;
+  --text-4xl: 6rem;
+  --text-4xl--line-height: 5.75rem;
+
+  /* Radius: 2px on controls, 0 on images (use rounded-none there). */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
+  --radius-4xl: 4px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-stretch: 112%;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--talon);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Wordmark: display face, lowercase, tight. */
+@utility wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-stretch: 100%;
+  letter-spacing: -0.045em;
+  text-transform: lowercase;
+  line-height: 1;
+}
+
+/* Display copy that is not a heading element (hero lines, big prices). */
+@utility display {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+}
+
+/* Body copy measure: keeps line length under 72ch. */
+@utility measure {
+  max-width: 68ch;
+}
+
+/* Money, order numbers, table figures. */
+@utility num {
+  font-variant-numeric: tabular-nums lining-nums;
+}

@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: owlyn-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: owlyn
+      POSTGRES_PASSWORD: owlyn
+      POSTGRES_DB: owlyn
+    ports:
+      # Host 5436 → container 5432. Change the left side if 5436 is busy on your machine,
+      # and keep DATABASE_URL in .env in sync.
+      - "5436:5432"
+    volumes:
+      - owlyn_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U owlyn -d owlyn"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  owlyn_pgdata:
