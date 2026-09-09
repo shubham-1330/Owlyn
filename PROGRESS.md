@@ -1,93 +1,88 @@
 # Progress
 
-## Phase 3: Catalog (done)
+## Phase 4: Cart & wishlist (done)
 
-### Pre-work
+### Pricing engine first
 
-- `BackInStockRequest` already existed from Phase 1 with `variantId`, `email`, `userId?`, `status`, `notifiedAt`, timestamps and a unique on `(email, variantId)`, so no new model was needed. The Phase 3 migration (`catalog_indexes_and_media`) adds indexes on `Product(status, salesCount)`, `Product(status, basePrice)`, `ProductVariant(size)`, `ProductVariant(colorName)`, plus `ProductImage.kind` (IMAGE | VIDEO) and `posterUrl` for gallery video.
-- `lib/search-params.ts` is the single parser for listing URLs: category, size, colour, price range, gender, activity, brand line, discount, in-stock, sort and page. It accepts repeated and comma-joined values, drops invalid values without failing the page, folds the price form's two inputs into one `price` param, serialises to a canonical sorted query string, and decides indexability. The PLP and the search page both use it; there is no second parser.
+`lib/pricing/` is pure: no clock, no database, no settings lookups; everything is passed in and all money is integer paise.
 
-### One query per listing
+- `lineTotal`, `cartSubtotal`, `evaluateCoupon`, `shippingEstimate`, `taxBreakdown`, `grandTotal`, and `priceCart` which runs the whole cart and **throws if line nets do not sum to subtotal minus discount**.
+- Coupons cover PERCENT, FLAT, FREE_SHIPPING and BXGY with minOrderValue, maxDiscount, usageLimit, perUserLimit, date window, first-order-only and appliesTo ALL / CATEGORY / PRODUCT / COLLECTION. Every rejection has a specific, showable message ("Add ₹1,500 more to use FLAT300.", "LAUNCH25 expired on 11 Aug 2026.").
+- **23 pricing tests** in `lib/pricing/pricing.test.ts` (58 across the suite): percent rounding on odd amounts, maxDiscount cap, partially eligible carts, expired, not started, exhausted, per-user and first-order gates, FLAT larger than the eligible subtotal, BXGY with the cheaper unit free across lines and with ineligible lines, an incomplete BXGY set, free-shipping stacking with a flat discount, GST back-out by rate, and the sum-of-lines invariant.
 
-`lib/catalog/query.ts` builds one SQL statement per page load. A `base` CTE scopes products (category subtree, collection, virtual listing or full-text search) and joins variant aggregates laterally. `matched` applies every filter. `page` orders and limits. `items` returns the page as JSON with each product's first two images pulled in a correlated subquery. Nine facet CTEs count with every _other_ filter applied, so the number beside a size stays true after a colour is ticked. The whole thing comes back as one row. There is no per-product follow-up query.
+Rounding calls made, all in one place so they can be changed:
 
-Worst case measured with `pnpm exec tsx scripts/explain-catalog.ts` (men's subtree, three categories, four sizes, three colours, a price band, gender, two activities, three brand lines, a discount floor, in-stock only, sorted by price):
+| Case                                   | Rule chosen                                                                                                                                                                                                                       |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Percent discount                       | Half-up at the line level (`roundHalfUp`), then summed. 12.5% of ₹1,299 is 16,237.5 paise and rounds to 16,238.                                                                                                                   |
+| A binding maxDiscount or a FLAT amount | Spread across eligible lines proportionally with the largest-remainder method, so line discounts sum to the cap exactly and never exceed a line. The leftover paise go to the largest fractional parts, ties to the earlier line. |
+| BXGY                                   | For every (buy + get) eligible units, the `get` cheapest units in the whole cart are free, even when they sit on a different line from the "buy" units.                                                                           |
+| minOrderValue                          | Checked against the whole cart subtotal before any discount.                                                                                                                                                                      |
+| Free-shipping threshold                | Evaluated on the discounted merchandise total, so a flat discount can pull a cart back under the threshold. A FREE_SHIPPING coupon always wins.                                                                                   |
+| Empty cart                             | No shipping charged; this was a real bug the test caught.                                                                                                                                                                         |
+| GST                                    | Backed out of each line's discounted net, half-up per line, then summed. ₹799 at 5% and ₹5,499 at 18% give ₹876.88.                                                                                                               |
 
-| Measure                                 | Value       |
-| --------------------------------------- | ----------- |
-| Round trip from Node (single statement) | 44 to 53 ms |
-| Postgres execution time                 | 6.3 ms      |
-| Postgres planning time                  | 23.4 ms     |
-| Shared buffers hit                      | 594         |
-| Plan length                             | 775 lines   |
+### Cart
 
-Scans in the plan: index scans on `ProductVariant_productId_colorName_idx`, `_ProductAttributeValues_B_index`, `AttributeValue_pkey`, `Attribute_slug_key`, `ProductImage_productId_position_idx` and `Category_parentId_position_idx`; sequential scans only on `Product` (40 rows), `Category` (32 rows) and `_ProductCategories` (58 rows), which the planner rightly prefers at this size. The full plan is reproducible with the script. Planning outweighs execution because the statement is wide; at scale the wins are prepared-statement plan caching (Prisma reuses prepared statements per connection) and, if listings grow past tens of thousands of products, denormalising the minimum variant price onto `Product`.
+- Guest carts key off an httpOnly, SameSite=Lax `cartToken` cookie set only by server actions; user carts sit on `Cart.userId`. `CartItem.priceAtAdd` (new column) records the unit price at add time.
+- `lib/cart/load.ts` builds the JSON-safe read model once per cart: live price and stock per line, per-line max from the new `cart.maxQtyPerLine` setting, price-change and stock notices, coupon re-evaluation with the engine, the default zone's standard rate as the shipping estimate, and an upsell rail from `ProductRelation`. It is cached per cart and tagged `cart:<id>`, `products`, `settings`, `shipping`, so any mutation, product edit or setting change invalidates it.
+- `lib/cart/service.ts`: every mutation resolves the cart from the session or cookie, re-reads the variant's price and stock, clamps quantity to min(stock, per-line max), ignores anything the client says about prices, then revalidates the tag and returns the fresh cart. A changed price keeps the line and surfaces "Price updated" until the shopper changes the quantity, which acknowledges the live price.
+- **Merge on login** (`mergeGuestCartIntoUser`): one Serializable transaction, retried on conflict. Same variant keeps the larger quantity, not the sum; the guest coupon fills an empty slot; the guest cart is deleted. A second sign-in callback finds no guest cart and does nothing. It runs from the Auth.js `signIn` event and again lazily if a signed-in request still carries a guest token.
+- **Client**: `CartProvider` holds server truth and a `useOptimistic` view. Quantity and remove apply instantly; a failed action reverts the view and posts an error in a live region. Adds open the drawer with the server's result. A tab that becomes visible refreshes from the server.
+- **Drawer and page share components**: `CartLines`, `CartSummary`, `CouponForm`, `FreeShippingBar`, `UpsellRail`, `CartNotices`. Subtotal, count and the shipping bar are `aria-live`.
+- The header's bag count reads `cart.view.itemCount` from the same provider the drawer renders from. The old separate count query is deleted.
 
-### PLP at `/collections/[slug]`
+### Wishlist and recently viewed
 
-- Slug resolution (`lib/catalog/scope.ts`): real categories with their subtree, live collections, the virtual listings `new`, `bestsellers`, `sale`, `all`, and cross-gender types like `footwear` or `sneakers` that union the men's and women's categories. All of the menu's links now resolve.
-- Every filter is a real link, so state lives in the URL, works without JavaScript and is keyboard reachable. Active-filter chips, result count with a live region, colour swatches with hex, a price form whose hidden inputs keep the rest of the state, sort as a select, and an in-stock toggle.
-- "Load more" is a real `?page=n` link enhanced to fetch in place through a server action, append, and move the URL with `replaceState`. The first two extra pages load as the sentinel scrolls into view; after that it takes a click. Crawlers also get prev/next links.
-- SEO: canonical always points at the bare listing. Bare and single-facet pages are `index,follow`; multi-facet, price, discount, sorted and search pages are `noindex,follow`. Filter links that would land on a noindex combination carry `rel="nofollow"`.
-- Sizes order naturally (UK numerically, then XS to XXL, paired sizes, one size); colours group by name so two products with slightly different hex values for "Ink" produce one option; category options order by department then leaf.
+- Signed-in wishlists live in `WishlistItem` and are cached per user under `wishlist:<userId>`; guests keep `owlyn:wishlist` in localStorage. `WishlistProvider` merges the browser list into the account on the first signed-in render and clears it. The heart on every card and on the PDP, the header count and the wishlist pages all read the provider.
+- Wishlist page: move to bag for a saved variant, a size picker when only the product was saved, notify-me on sold-out variants, remove. Guests get the same page at `/wishlist`.
+- Recently viewed: the PDP records a view through a server action keyed by the user or a `visitorToken` cookie, deduplicated, capped at 12. Rails on the PDP and the bag page.
 
-### PDP at `/products/[slug]`
+### Cleanup
 
-- Gallery: a single scroll-snap strip that swipes on touch and takes thumbnails, arrows and hover-to-zoom on a fine pointer. Every slide is a fixed 3:4 box, the first image is `priority` with a preload link, `sizes` is set for the two-column layout, and each image has a blur placeholder from its seeded `blurData`. Video media renders as `<video>` with its poster. Measured layout shift on load: 0.
-- Colour swatches switch the media set and mirror the choice into `?color=` with `replaceState`; the page reads the same param on the server so a shared URL opens on that colour.
-- Size selector with low-stock notes; sold-out sizes show a "Notify me" form that writes a `BackInStockRequest`, rate limited per email (3 an hour) and per IP (20 an hour) with an in-memory sliding window, or Upstash when its env vars are set.
-- Size guide dialog from the category's `SizeChart`. Pincode delivery estimate from the pincode directory, shipping zones and the dispatch cut-off, with COD availability.
-- Accordions for description, materials and care, shipping and returns. Reviews from seed with average, histogram, verified badges, brand replies and client-side sorting.
-- Mobile sticky bar appears once the purchase panel scrolls away. **Its "Add to bag" button is inert until Phase 4**, as is the main one; both say so on the page.
-- JSON-LD `Product` with `AggregateOffer`, availability and `AggregateRating`, plus `BreadcrumbList` from the breadcrumbs component.
-- "Complete the look" from `ProductRelation` and "You may also like" from the primary category.
-
-### Also in this phase
-
-- Seed: 72 approved reviews from eight fictional customers across 39 products, review counters recomputed, blur placeholders on all 170 images.
-- `app/sitemap.ts` (89 URLs) and `app/robots.ts`.
-- Cache tags on every new query: `products`, `categories`, `collections`, `reviews`, `shipping`, and `product:<slug>` for the detail page, so Phase 7 can invalidate exactly what changed.
-- Unknown listing and product slugs return a real 404 status: the existence check runs in `generateMetadata`, before the route's loading boundary starts streaming.
+- PDP "Add to bag", the mobile sticky bar and a new quick-add on every product card call the same `AddToBagButton` / `QuickAdd`, which call the real action. The Phase 3 inert placeholders are gone.
+- **Checkout** is the one inert control left: the drawer and bag page show a disabled "Checkout" with a note, until Phase 5.
 
 ### Verified in a real browser against the production build
 
-- Filter, filter again, back, back: each step restored the previous URL, chips, selected states and count exactly.
-- The two-filter URL fetched with a cookie-less client rendered the same count, chips, selections and four products.
-- Tab from the sort control moves straight into the filter links with a visible outline; all 65 sidebar controls are focusable and named.
-- On the product page: CLS 0 on load; Ink swatch changed both slides, both thumbnails, the legend and the URL; size guide opened with the men's footwear table and closed on Escape; UK 8 on the sold-out Terrace showed the notify form and stored a pending request; pincode 560034 returned Bengaluru metro rates with COD.
-- At phone width: the strip swipes with snapping, thumbnails hide, the sticky bar appears after scrolling with the current selection, and nothing overflows horizontally.
-- `pnpm lint`, `pnpm typecheck`, `pnpm test` (35 tests) and `pnpm build` pass.
+- Sock added from the PDP with Ink and S/M: drawer opened with the Ink image, "Ink · S/M", quantity 1, the shipping bar at 40% asking for ₹1,200 more, the header at 1 item.
+- FLAT300 on that ₹799 bag: "Add ₹1,700 more to use FLAT300."
+- Hush Court 1 in Ink, UK 8 added: two lines, "Free shipping unlocked", shipping "Free", GST ₹876.88. Added again: quantity 2, still two lines, three items; the database agrees.
+- Signed in as Asha, whose account cart already held a Seam Core Tee: the bag showed three lines, the guest cart was deleted, the header read four items.
+- Two tabs on the bag: removing the sock in one updated it instantly; a refresh of the other showed two lines.
+- "Move to wishlist" from the bag put the tee on the account wishlist with a working "Move to bag".
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (58) and `pnpm build` pass.
 
 ### Decisions worth knowing
 
-- **Facet counts exclude their own dimension.** Standard faceted-search behaviour: within a dimension options are OR, across dimensions AND, and counts show what ticking the option would yield.
-- **Gender filter is inclusive of unisex.** "Men" matches MEN and UNISEX products, which is what a shopper means.
-- **Load more updates the URL.** A refresh after loading page 3 shows page 3, which is what the URL says; the trade-off is that items from earlier pages are not repeated on refresh.
-- **Search results are not cached**; listing pages are, keyed by scope and params, five minutes, tagged.
-- **Upstash packages added** (`@upstash/ratelimit`, `@upstash/redis`, both on the approved list). Without env vars the in-memory limiter is used.
+- **Cached payload shapes are versioned.** Adding `variants` to product cards broke a client component reading data cached by the previous deploy; the fix was a defensive read plus a `:v2` suffix on the affected cache keys. Any future change to a cached shape should bump its key.
+- **Optimistic maths is intentionally shallow** (line total × qty, subtotal, threshold check). The server's full pricing replaces it within the same transition, so shown totals are never stale for more than a round trip.
+- **Load more, filters and quick add share the product card**, so every listing now has quick add and a wishlist heart without extra queries: variants ride along in the card payload.
+
+## Phase 3: Catalog (done)
+
+Shared URL parser, single-statement listing query with facets, PLP with real-link filters and crawlable pagination, PDP with a CLS-free gallery, colour URLs, notify-me, size guide, delivery estimate, reviews, JSON-LD; sitemap and robots. See git history for the full notes and the query plan.
 
 ## Phase 2: Storefront shell (done)
 
-Header with mega menu, mobile drawer and search overlay; home page sections from `HomepageSection` and `Banner`; footer; Markdown CMS pages with a contact form; bag and wishlist read-only pages; tagged query cache. See git history for the full notes.
+Header with mega menu, drawer and search; home page from `HomepageSection` and `Banner`; footer; Markdown CMS pages; tagged query cache.
 
 ## Phase 1: Data & auth (done)
 
-49-table schema, single init migration with a trigger-maintained search vector, idempotent seed, Auth.js v5 with credentials and Google, guards and middleware.
+49-table schema, init migration with search trigger, idempotent seed, Auth.js v5 with credentials and Google, guards and middleware.
 
 ## Phase 0: Foundation (done)
 
-Next.js 15.5, React 19, Tailwind v4 tokens, shadcn on Radix restyled, Archivo and Inter Tight, tooling, Postgres on port 5436. Tagline: "For the hours nobody sees."
+Next.js 15.5, React 19, Tailwind v4 tokens, shadcn on Radix restyled, Archivo and Inter Tight, tooling, Postgres on port 5436.
 
-## Phase 4: Cart & wishlist (next)
+## Sequencing note for Phase 6
 
-- Guest and user carts, cart drawer, merge on login, server-side revalidation of price and stock on every mutation, coupon evaluation, wishlist toggle, recently viewed.
-- The PDP's "Add to bag" buttons become live.
+Phase 6 (account area: orders, cancellations, returns, invoices, tracking) was requested while Phase 4 was mid-build. Phase 5 (checkout, Razorpay, COD, order creation, emails, invoice PDF) has not been built, so no orders exist yet. Phase 6 can be built next either on top of seeded orders that stand in for checkout, or after Phase 5 creates real ones. The account routes, ownership checks, cancellation restocking and return flows are the same either way; only how the orders get there differs.
 
 ## Known gaps
 
-- "Add to bag" on the product page and its mobile sticky bar are inert until Phase 4.
-- Review submission and helpful votes wait for Phase 8; reviews are read-only from seed.
-- Back-in-stock notifications are stored but not sent until the email layer lands (Phase 5 introduces Resend, Phase 8 wires the job).
-- No hero video or product video assets yet; both code paths exist.
-- `/track` in the mobile drawer and footer is a Phase 6 route.
-- The demo database holds one support ticket, one newsletter subscriber and one back-in-stock request from the browser checks.
+- Checkout is inert until Phase 5.
+- Back-in-stock and coupon emails wait for the email layer.
+- Review submission waits for Phase 8.
+- `/track` links in the drawer and footer are a Phase 6 route.
+- The demo database holds one support ticket, one newsletter subscriber, one back-in-stock request and Asha's merged cart from the browser checks.

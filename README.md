@@ -95,7 +95,7 @@ app/
   layout.tsx            Root layout, fonts, metadata
   not-found.tsx         404 page
   (auth)/               Login and register pages plus their server actions
-  (storefront)/         Header + footer layout, home, /collections/[slug], /products/[slug], /search, /pages/[slug], /cart, /account
+  (storefront)/         Header + footer layout, home, /collections/[slug], /products/[slug], /search, /pages/[slug], /cart, /wishlist, /account
   admin/                Admin dashboard, light theme, staff-only
   api/auth/             Auth.js route handler
 components/
@@ -104,6 +104,8 @@ components/
   storefront/           Header, footer, product card and rail, home sections, Markdown, breadcrumbs
     plp/                Filters, chips, sort, grid with load more, pagination
     pdp/                Gallery, product view, notify form, size guide, delivery estimator, reviews
+    cart/               Cart provider, drawer, lines, summary, coupon form, shipping bar, quick add
+    wishlist/           Wishlist provider, heart button, wishlist page view
   seo/                  JSON-LD helper
   admin/                Admin components (Phase 7)
 hooks/                  Client hooks (recent searches)
@@ -113,6 +115,10 @@ lib/
   auth/                 Password hashing, guards, safe redirect helper
   cache.ts              Tagged data-cache wrapper for queries
   catalog/              Listing scope resolution and the single-statement catalog query
+  pricing/              Pure pricing engine: lines, coupons, shipping, tax, totals (unit tested)
+  cart/                 Cart cookies, cached read model, mutations and the login merge
+  wishlist/             Wishlist service
+  recently-viewed.ts    Recently viewed writes and reads
   search-params.ts      The one parser and serialiser for listing URLs
   rate-limit.ts         Sliding-window limiter (Upstash or in-memory)
   delivery.ts           Delivery window maths
@@ -138,6 +144,7 @@ The storefront reads its structure from the database, so the admin (Phase 7) can
 - **Home page**: `HomepageSection` rows set the order and per-section config; `Banner` rows fill the hero, the collection block and the editorial split, honouring their schedule windows.
 - **Pages**: `Page` rows render at `/pages/[slug]` from GitHub-flavoured Markdown, sanitised on the server. Full MDX is deliberately not supported.
 - **Settings**: `Setting` rows drive the trust strip, footer, trending searches, delivery cut-off and store contact details.
+- **Bag**: guest bags key off an httpOnly `cartToken` cookie, account bags off the user. Every mutation re-reads price and stock on the server; the pricing engine in `lib/pricing/` does the maths. On sign-in the guest bag merges into the account bag (same variant keeps the larger quantity).
 - **Listings**: `/collections/[slug]` resolves a category (with its subtree), a live collection, a virtual listing (`new`, `bestsellers`, `sale`, `all`) or a cross-gender type (`footwear`, `sneakers`). Filter state lives in the URL and is parsed by `lib/search-params.ts`; the search page shares it.
 
 Reads go through `lib/queries/` and are cached with tags, so a publish can call `revalidateTag` on exactly what changed.
