@@ -233,3 +233,74 @@
 @utility num {
   font-variant-numeric: tabular-nums lining-nums;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Motion: only on user action (drawer, overlay, menu). Reduced-motion */
+/*  users get the base-layer override above, which zeroes durations.   */
+/* ------------------------------------------------------------------ */
+@theme {
+  --animate-fade-in: owl-fade-in 180ms ease-out;
+  --animate-fade-out: owl-fade-out 140ms ease-in;
+  --animate-slide-down: owl-slide-down 180ms ease-out;
+  --animate-slide-in-left: owl-slide-in-left 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-slide-out-left: owl-slide-out-left 200ms ease-in;
+
+  @keyframes owl-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes owl-fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes owl-slide-down {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes owl-slide-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes owl-slide-out-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+/* Functional scrims for text legibility over imagery. Not decoration. */
+@utility scrim-b {
+  background: linear-gradient(to top, rgb(14 17 22 / 0.78), rgb(14 17 22 / 0) 65%);
+}
+@utility scrim-t {
+  background: linear-gradient(to bottom, rgb(14 17 22 / 0.55), rgb(14 17 22 / 0) 100%);
+}
+
+/* Horizontal rails scroll without a visible scrollbar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
