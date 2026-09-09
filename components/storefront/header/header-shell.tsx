@@ -10,7 +10,6 @@ import { MobileMenu } from "@/components/storefront/header/mobile-menu";
 import { SearchOverlay } from "@/components/storefront/header/search-overlay";
 import { Wordmark } from "@/components/storefront/wordmark";
 import { GUTTER, HEADER_HEIGHT } from "@/lib/layout";
-import type { HeaderCounts } from "@/lib/queries/counts";
 import type { MenuPanel } from "@/lib/queries/menu";
 import { cn } from "@/lib/utils";
 
@@ -21,13 +20,11 @@ import { cn } from "@/lib/utils";
  */
 export function HeaderShell({
   menu,
-  counts,
   isSignedIn,
   isStaff,
   trending,
 }: {
   menu: MenuPanel[];
-  counts: HeaderCounts;
   isSignedIn: boolean;
   isStaff: boolean;
   trending: string[];
@@ -94,11 +91,7 @@ export function HeaderShell({
             <MegaMenu panels={menu} onOpenChange={setMenuOpen} />
           </div>
 
-          <HeaderActions
-            counts={counts}
-            isSignedIn={isSignedIn}
-            onSearch={() => setSearchOpen(true)}
-          />
+          <HeaderActions isSignedIn={isSignedIn} onSearch={() => setSearchOpen(true)} />
         </div>
       </header>
 
@@ -108,7 +101,6 @@ export function HeaderShell({
         panels={menu}
         isSignedIn={isSignedIn}
         isStaff={isStaff}
-        counts={counts}
       />
       <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} trending={trending} />
     </>

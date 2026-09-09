@@ -519,6 +519,7 @@ export const settings: SettingSeed[] = [
   { key: "returns.windowDays", value: 7 },
   { key: "returns.warrantyDays", value: 90 },
   { key: "orders.reservationMinutes", value: 20 },
+  { key: "cart.maxQtyPerLine", value: 10 },
   { key: "maintenance.enabled", value: false },
   { key: "maintenance.message", value: "We are updating the store. Back within the hour." },
   { key: "social", value: { instagram: "https://instagram.com/owlyn.example", youtube: "" } },

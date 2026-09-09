@@ -226,6 +226,10 @@ items AS (
     'id', pg.id, 'slug', pg.slug, 'name', pg.name, 'brandLine', pg."brandLine",
     'price', pg.price, 'compareAtPrice', pg."compareAtPrice", 'badges', pg.badges,
     'inStock', pg.in_stock, 'colorCount', pg.color_count,
+    'variants', coalesce((
+      SELECT json_agg(json_build_object('id', v.id, 'size', v.size, 'colorName', v."colorName", 'stock', v.stock) ORDER BY v.position)
+      FROM "ProductVariant" v WHERE v."productId" = pg.id AND v."isActive"
+    ), '[]'::json),
     'images', coalesce((
       SELECT json_agg(json_build_object('url', i.url, 'alt', i.alt, 'blurData', i."blurData") ORDER BY i.position)
       FROM (SELECT pi.url, pi.alt, pi."blurData", pi.position FROM "ProductImage" pi WHERE pi."productId" = pg.id AND pi.kind = 'IMAGE' ORDER BY pi.position LIMIT 2) i
@@ -329,6 +333,7 @@ type RawItem = {
   inStock: boolean;
   colorCount: number;
   images: RawImage[];
+  variants: Array<{ id: string; size: string; colorName: string; stock: number }>;
 };
 type RawRow = {
   total: number;
@@ -361,6 +366,7 @@ function toCard(item: RawItem): ProductCardData {
     images: item.images,
     inStock: item.inStock,
     colorCount: item.colorCount,
+    variants: item.variants ?? [],
   };
 }
 
@@ -394,7 +400,7 @@ async function runCatalogQuery(scope: CatalogScope, params: CatalogParams): Prom
 
 const cachedListing = cached(
   runCatalogQuery,
-  ["catalog:listing"],
+  ["catalog:listing:v2"],
   [CACHE_TAGS.products, CACHE_TAGS.categories, CACHE_TAGS.collections],
 );
 

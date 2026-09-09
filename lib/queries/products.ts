@@ -20,7 +20,8 @@ export const productCardSelect = {
   },
   variants: {
     where: { isActive: true },
-    select: { stock: true, colorName: true, price: true },
+    orderBy: { position: "asc" },
+    select: { id: true, size: true, stock: true, colorName: true, price: true },
   },
 } satisfies Prisma.ProductSelect;
 
@@ -37,6 +38,8 @@ export type ProductCardData = {
   images: Array<{ url: string; alt: string; blurData?: string | null }>;
   inStock: boolean;
   colorCount: number;
+  /** Purchasable options for quick add, in position order. */
+  variants: Array<{ id: string; size: string; colorName: string; stock: number }>;
 };
 
 export function toProductCard(p: ProductCardRow): ProductCardData {
@@ -56,6 +59,12 @@ export function toProductCard(p: ProductCardRow): ProductCardData {
     images: p.images,
     inStock,
     colorCount: new Set(p.variants.map((v) => v.colorName)).size,
+    variants: p.variants.map((v) => ({
+      id: v.id,
+      size: v.size,
+      colorName: v.colorName,
+      stock: v.stock,
+    })),
   };
 }
 
@@ -74,7 +83,7 @@ export const getFeaturedProducts = cached(
     });
     return rows.map(toProductCard);
   },
-  ["products:featured"],
+  ["products:featured:v2"],
   [CACHE_TAGS.products],
 );
 
@@ -98,7 +107,7 @@ export const getNewProducts = cached(
     }
     return rows.map(toProductCard);
   },
-  ["products:new"],
+  ["products:new:v2"],
   [CACHE_TAGS.products],
 );
 
@@ -136,6 +145,6 @@ export const getCollectionWithProducts = cached(
       products: collection.products.map((cp) => toProductCard(cp.product)),
     };
   },
-  ["collection:with-products"],
+  ["collection:with-products:v2"],
   [CACHE_TAGS.collections, CACHE_TAGS.products],
 );

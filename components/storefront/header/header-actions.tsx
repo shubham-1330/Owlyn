@@ -2,9 +2,9 @@
 
 import { Heart, Search, ShoppingBag, User } from "lucide-react";
 import Link from "next/link";
-import * as React from "react";
 
-import type { HeaderCounts } from "@/lib/queries/counts";
+import { useCart } from "@/components/storefront/cart/cart-provider";
+import { useWishlist } from "@/components/storefront/wishlist/wishlist-provider";
 import { cn } from "@/lib/utils";
 
 const iconButton =
@@ -23,14 +23,16 @@ function Count({ value }: { value: number }) {
 }
 
 export function HeaderActions({
-  counts,
   isSignedIn,
   onSearch,
 }: {
-  counts: HeaderCounts;
   isSignedIn: boolean;
   onSearch: () => void;
 }) {
+  const cart = useCart();
+  const wishlist = useWishlist();
+  const bag = cart.view.itemCount;
+
   return (
     <div className="-mr-2 flex items-center">
       <button type="button" onClick={onSearch} aria-label="Search" className={iconButton}>
@@ -44,21 +46,23 @@ export function HeaderActions({
         <User className="size-5" aria-hidden />
       </Link>
       <Link
-        href="/account/wishlist"
-        aria-label={`Wishlist, ${counts.wishlist} ${counts.wishlist === 1 ? "item" : "items"}`}
+        href={wishlist.href}
+        aria-label={`Wishlist, ${wishlist.count} ${wishlist.count === 1 ? "item" : "items"}`}
         className={cn(iconButton, "hidden sm:inline-flex")}
       >
         <Heart className="size-5" aria-hidden />
-        <Count value={counts.wishlist} />
+        <Count value={wishlist.count} />
       </Link>
-      <Link
-        href="/cart"
-        aria-label={`Bag, ${counts.bag} ${counts.bag === 1 ? "item" : "items"}`}
+      <button
+        type="button"
+        onClick={() => cart.setOpen(true)}
+        aria-label={`Bag, ${bag} ${bag === 1 ? "item" : "items"}`}
+        aria-haspopup="dialog"
         className={iconButton}
       >
         <ShoppingBag className="size-5" aria-hidden />
-        <Count value={counts.bag} />
-      </Link>
+        <Count value={bag} />
+      </button>
     </div>
   );
 }

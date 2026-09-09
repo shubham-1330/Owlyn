@@ -3,6 +3,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 
 import { authConfig } from "@/lib/auth.config";
+import { getCartToken } from "@/lib/cart/cookies";
+import { mergeGuestCartIntoUser } from "@/lib/cart/service";
 import { verifyPassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
@@ -48,6 +50,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       await db.user
         .update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
         .catch(() => undefined);
+      // Fold the guest bag into the account. Idempotent, so a second callback is harmless.
+      try {
+        const token = await getCartToken();
+        if (token) await mergeGuestCartIntoUser(user.id, token);
+      } catch (error) {
+        console.error("Guest cart merge failed", error);
+      }
     },
   },
   callbacks: {

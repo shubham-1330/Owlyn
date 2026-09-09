@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { AddToBagButton } from "@/components/storefront/cart/add-to-bag-button";
 import { DeliveryEstimator } from "@/components/storefront/pdp/delivery-estimator";
 import { Gallery } from "@/components/storefront/pdp/gallery";
 import { NotifyForm } from "@/components/storefront/pdp/notify-form";
@@ -10,8 +11,8 @@ import { SizeGuideDialog } from "@/components/storefront/pdp/size-guide-dialog";
 import { StickyBar } from "@/components/storefront/pdp/sticky-bar";
 import { Price } from "@/components/storefront/price";
 import { RatingStars } from "@/components/storefront/rating-stars";
+import { WishlistButton } from "@/components/storefront/wishlist/wishlist-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { BADGE_LABEL, BADGE_VARIANT } from "@/lib/catalog/badges";
 import type { ProductDetail, ProductVariantData } from "@/lib/queries/product";
 import { slugify } from "@/lib/slug";
@@ -268,19 +269,17 @@ export function ProductView({
             />
           ) : null}
 
-          <div ref={buyButton} className="flex flex-col gap-2">
-            <Button
-              size="lg"
-              disabled
-              aria-disabled
-              className="w-full"
-              title="The bag opens in the next release"
-            >
-              {canAdd ? "Add to bag" : selectedVariant ? "Sold out" : "Select a size"}
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Bag and checkout open in the next release.
-            </p>
+          <div ref={buyButton} className="flex gap-2">
+            <AddToBagButton
+              variantId={canAdd ? (selectedVariant?.id ?? null) : null}
+              label={canAdd ? "Add to bag" : selectedVariant ? "Sold out" : "Select a size"}
+              className="flex-1"
+            />
+            <WishlistButton
+              productId={product.id}
+              variantId={selectedVariant?.id ?? null}
+              productName={product.name}
+            />
           </div>
 
           <DeliveryEstimator unitPrice={price} />
@@ -293,6 +292,7 @@ export function ProductView({
         price={price}
         compareAtPrice={compareAt}
         detail={[color?.name, selectedVariant?.size].filter(Boolean).join(" · ")}
+        variantId={selectedVariant?.id ?? null}
         canAdd={canAdd}
       />
     </>

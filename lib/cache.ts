@@ -26,6 +26,8 @@ export type CacheTag = (typeof CACHE_TAGS)[keyof typeof CACHE_TAGS] | `${string}
 export const productTag = (slug: string): CacheTag => `product:${slug}`;
 export const categoryTag = (slug: string): CacheTag => `category:${slug}`;
 export const collectionTag = (slug: string): CacheTag => `collection:${slug}`;
+export const cartTag = (cartId: string): CacheTag => `cart:${cartId}`;
+export const wishlistTag = (userId: string): CacheTag => `wishlist:${userId}`;
 
 export const DEFAULT_REVALIDATE_SECONDS = 300;
 

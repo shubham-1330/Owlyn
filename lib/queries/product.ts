@@ -281,7 +281,7 @@ async function loadProductDetail(slug: string): Promise<ProductDetail | null> {
 export function getProductDetail(slug: string): Promise<ProductDetail | null> {
   return cached(
     loadProductDetail,
-    ["product:detail"],
+    ["product:detail:v2"],
     [CACHE_TAGS.products, CACHE_TAGS.reviews, CACHE_TAGS.categories, productTag(slug)],
   )(slug);
 }

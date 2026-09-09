@@ -6,8 +6,9 @@ import Link from "next/link";
 import { Dialog, VisuallyHidden } from "radix-ui";
 import { useEffect, useState } from "react";
 
+import { useCart } from "@/components/storefront/cart/cart-provider";
 import { Wordmark } from "@/components/storefront/wordmark";
-import type { HeaderCounts } from "@/lib/queries/counts";
+import { useWishlist } from "@/components/storefront/wishlist/wishlist-provider";
 import type { MenuPanel } from "@/lib/queries/menu";
 import { cn } from "@/lib/utils";
 
@@ -24,14 +25,12 @@ export function MobileMenu({
   panels,
   isSignedIn,
   isStaff,
-  counts,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   panels: MenuPanel[];
   isSignedIn: boolean;
   isStaff: boolean;
-  counts: HeaderCounts;
 }) {
   const [active, setActive] = useState<MenuPanel | null>(null);
 
@@ -81,7 +80,6 @@ export function MobileMenu({
                 onSelect={setActive}
                 isSignedIn={isSignedIn}
                 isStaff={isStaff}
-                counts={counts}
               />
             )}
           </div>
@@ -96,14 +94,14 @@ function RootView({
   onSelect,
   isSignedIn,
   isStaff,
-  counts,
 }: {
   panels: MenuPanel[];
   onSelect: (panel: MenuPanel) => void;
   isSignedIn: boolean;
   isStaff: boolean;
-  counts: HeaderCounts;
 }) {
+  const cart = useCart();
+  const wishlist = useWishlist();
   return (
     <nav aria-label="Main" className="flex flex-col">
       <ul className="flex flex-col">
@@ -124,18 +122,18 @@ function RootView({
           </Link>
         </li>
         <li>
-          <Link href="/account/wishlist" className={cn(row, "text-base")}>
+          <Link href={wishlist.href} className={cn(row, "text-base")}>
             Wishlist
-            {counts.wishlist > 0 ? (
-              <span className="text-sm text-muted-foreground num">{counts.wishlist}</span>
+            {wishlist.count > 0 ? (
+              <span className="text-sm text-muted-foreground num">{wishlist.count}</span>
             ) : null}
           </Link>
         </li>
         <li>
           <Link href="/cart" className={cn(row, "text-base")}>
             Bag
-            {counts.bag > 0 ? (
-              <span className="text-sm text-muted-foreground num">{counts.bag}</span>
+            {cart.view.itemCount > 0 ? (
+              <span className="text-sm text-muted-foreground num">{cart.view.itemCount}</span>
             ) : null}
           </Link>
         </li>

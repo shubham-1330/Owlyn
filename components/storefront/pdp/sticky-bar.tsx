@@ -1,19 +1,17 @@
 "use client";
 
+import { AddToBagButton } from "@/components/storefront/cart/add-to-bag-button";
 import { Price } from "@/components/storefront/price";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/**
- * Mobile bar that appears once the main purchase button scrolls away. The
- * button is inert until the bag lands in Phase 4 (see PROGRESS.md).
- */
+/** Mobile bar that appears once the main purchase button scrolls away. Same add action as the panel. */
 export function StickyBar({
   visible,
   name,
   price,
   compareAtPrice,
   detail,
+  variantId,
   canAdd,
 }: {
   visible: boolean;
@@ -21,6 +19,7 @@ export function StickyBar({
   price: number;
   compareAtPrice: number | null;
   detail: string;
+  variantId: string | null;
   canAdd: boolean;
 }) {
   return (
@@ -39,9 +38,12 @@ export function StickyBar({
             <Price price={price} compareAtPrice={compareAtPrice} className="text-xs" />
           </p>
         </div>
-        <Button disabled aria-disabled className="shrink-0" tabIndex={visible ? 0 : -1}>
-          {canAdd ? "Add to bag" : "Select a size"}
-        </Button>
+        <AddToBagButton
+          variantId={canAdd ? variantId : null}
+          size="default"
+          label={canAdd ? "Add to bag" : variantId ? "Sold out" : "Select a size"}
+          className="shrink-0"
+        />
       </div>
     </div>
   );
