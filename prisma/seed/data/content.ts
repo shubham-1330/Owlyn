@@ -103,6 +103,7 @@ export type MenuItemSeed = {
   label: string;
   url: string;
   group?: string;
+  image?: string;
   children?: MenuItemSeed[];
 };
 
@@ -188,6 +189,20 @@ export const mainMenu: MenuItemSeed[] = [
         label: "Everyday",
         url: "/collections/clothing?activity=everyday",
         group: "By activity",
+      },
+      {
+        id: "seed-menu-featured-t1",
+        label: "Night Run",
+        url: "/collections/night-run",
+        group: "tiles",
+        image: "/images/collections/night-run.svg",
+      },
+      {
+        id: "seed-menu-featured-t2",
+        label: "Court Edit",
+        url: "/collections/court-edit",
+        group: "tiles",
+        image: "/images/collections/court-edit.svg",
       },
     ],
   },
@@ -280,6 +295,20 @@ export const mainMenu: MenuItemSeed[] = [
         url: "/collections/women?activity=everyday",
         group: "By activity",
       },
+      {
+        id: "seed-menu-women-t1",
+        label: "Shop all women",
+        url: "/collections/women",
+        group: "tiles",
+        image: "/images/banners/editorial-women.svg",
+      },
+      {
+        id: "seed-menu-women-t2",
+        label: "Cold Start",
+        url: "/collections/cold-start?gender=women",
+        group: "tiles",
+        image: "/images/collections/cold-start.svg",
+      },
     ],
   },
   {
@@ -371,6 +400,20 @@ export const mainMenu: MenuItemSeed[] = [
         url: "/collections/men?activity=everyday",
         group: "By activity",
       },
+      {
+        id: "seed-menu-men-t1",
+        label: "Shop all men",
+        url: "/collections/men",
+        group: "tiles",
+        image: "/images/banners/editorial-men.svg",
+      },
+      {
+        id: "seed-menu-men-t2",
+        label: "Court Edit",
+        url: "/collections/court-edit?gender=men",
+        group: "tiles",
+        image: "/images/collections/court-edit.svg",
+      },
     ],
   },
 ];
@@ -408,14 +451,41 @@ export type HomepageSectionSeed = {
 export const homepageSections: HomepageSectionSeed[] = [
   { key: "hero", title: "Hero" },
   { key: "featured-rail", title: "Featured products", config: { limit: 8 } },
-  { key: "category-tiles", title: "Shop by category" },
+  {
+    key: "category-tiles",
+    title: "Shop by category",
+    config: {
+      tiles: [
+        {
+          label: "Footwear",
+          href: "/collections/footwear",
+          image: "/images/categories/men-footwear.svg",
+        },
+        {
+          label: "Clothing",
+          href: "/collections/clothing",
+          image: "/images/categories/women-clothing.svg",
+        },
+        { label: "Caps", href: "/collections/caps", image: "/images/categories/men-caps.svg" },
+        {
+          label: "Accessories",
+          href: "/collections/accessories",
+          image: "/images/categories/women-accessories.svg",
+        },
+      ],
+    },
+  },
   {
     key: "collection-block",
     title: "Curated collection",
-    config: { bannerSlot: "HOME_SECONDARY" },
+    config: { bannerSlot: "HOME_SECONDARY", collection: "cold-start", products: 4 },
   },
   { key: "new-rail", title: "New this week", config: { limit: 8, days: 14 } },
-  { key: "editorial-split", title: "Men and women" },
+  {
+    key: "editorial-split",
+    title: "Men and women",
+    config: { slots: ["EDITORIAL_MEN", "EDITORIAL_WOMEN"] },
+  },
   { key: "newsletter", title: "Newsletter" },
   { key: "trust-strip", title: "Trust strip" },
 ];
@@ -439,6 +509,7 @@ export const settings: SettingSeed[] = [
     },
   },
   { key: "support.email", value: "support@owlyn.example" },
+  { key: "search.trending", value: ["Court 1", "Strider", "Joggers", "Run cap", "Hood", "Duffel"] },
   { key: "support.phone", value: "+91 80 4000 0000" },
   { key: "support.hours", value: "Weekdays 10 am to 6 pm IST" },
   { key: "checkout.codLimit", value: 1_000_000 },

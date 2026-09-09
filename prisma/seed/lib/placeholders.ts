@@ -110,17 +110,17 @@ export type TileSvgInput = {
   accent: string;
 };
 
-/** Category tiles, collection heroes and banners. */
-export function tileSvg({ title, subtitle, width, height, bg, accent }: TileSvgInput): string {
-  const fg = textOn(bg);
+/**
+ * Category tiles, collection heroes and banners. Colour and one shape only:
+ * the components that use these render their own headline or label on top.
+ */
+export function tileSvg({ title, width, height, bg, accent }: TileSvgInput): string {
   const r = Math.min(width, height) * 0.42;
-  const titleSize = Math.round(Math.min(width, height) * 0.09);
-  const subSize = Math.round(titleSize * 0.42);
+  const ring = shade(bg, luminance(bg) > 0.35 ? -0.08 : 0.08);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(title)}">
 <rect width="${width}" height="${height}" fill="${bg}"/>
-<circle cx="${width * 0.78}" cy="${height * 0.42}" r="${r}" fill="${accent}" opacity="0.92"/>
-<text x="${Math.round(width * 0.06)}" y="${Math.round(height * 0.86)}" font-family="${FONT}" font-size="${titleSize}" font-weight="700" letter-spacing="-1.5" fill="${fg}">${escapeXml(title)}</text>
-${subtitle ? `<text x="${Math.round(width * 0.06)}" y="${Math.round(height * 0.86 + subSize * 1.6)}" font-family="${FONT}" font-size="${subSize}" fill="${fg}" opacity="0.72">${escapeXml(subtitle)}</text>` : ""}
+<circle cx="${width * 0.72}" cy="${height * 0.44}" r="${r * 1.18}" fill="${ring}"/>
+<circle cx="${width * 0.72}" cy="${height * 0.44}" r="${r}" fill="${accent}" opacity="0.92"/>
 </svg>
 `;
 }

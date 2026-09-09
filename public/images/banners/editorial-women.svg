@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500" role="img" aria-label="Women">
 <rect width="1200" height="1500" fill="#46407A"/>
-<circle cx="936" cy="630" r="504" fill="#F3F4F2" opacity="0.92"/>
-<text x="72" y="1290" font-family="Archivo, 'Inter Tight', Inter, Helvetica, Arial, sans-serif" font-size="108" font-weight="700" letter-spacing="-1.5" fill="#f3f4f2">Women</text>
-<text x="72" y="1362" font-family="Archivo, 'Inter Tight', Inter, Helvetica, Arial, sans-serif" font-size="45" fill="#f3f4f2" opacity="0.72">Footwear, clothing, accessories.</text>
+<circle cx="864" cy="660" r="594.7199999999999" fill="#554f85"/>
+<circle cx="864" cy="660" r="504" fill="#F3F4F2" opacity="0.92"/>
 </svg>

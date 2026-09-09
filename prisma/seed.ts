@@ -550,6 +550,7 @@ async function seedContent() {
         label: item.label,
         url: item.url,
         group: item.group ?? null,
+        image: item.image ?? null,
         parentId,
         position: i,
         isActive: true,

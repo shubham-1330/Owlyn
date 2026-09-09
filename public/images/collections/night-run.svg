@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-label="Night Run">
 <rect width="1600" height="900" fill="#0E1116"/>
-<circle cx="1248" cy="378" r="378" fill="#C79A4B" opacity="0.92"/>
-<text x="96" y="774" font-family="Archivo, 'Inter Tight', Inter, Helvetica, Arial, sans-serif" font-size="81" font-weight="700" letter-spacing="-1.5" fill="#f3f4f2">Night Run</text>
-<text x="96" y="828" font-family="Archivo, 'Inter Tight', Inter, Helvetica, Arial, sans-serif" font-size="34" fill="#f3f4f2" opacity="0.72">Running shoes, shorts, tees and socks built for after-dark miles. Reflective, light, quiet.</text>
+<circle cx="1152" cy="396" r="446.03999999999996" fill="#212429"/>
+<circle cx="1152" cy="396" r="378" fill="#C79A4B" opacity="0.92"/>
 </svg>
