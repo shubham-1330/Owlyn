@@ -5,12 +5,15 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { Breadcrumbs } from "@/components/storefront/breadcrumbs";
 import { ProductAccordions } from "@/components/storefront/pdp/product-accordions";
 import { ProductView } from "@/components/storefront/pdp/product-view";
+import { RecordView } from "@/components/storefront/pdp/record-view";
 import { ReviewsSection } from "@/components/storefront/pdp/reviews-section";
 import { ProductRail } from "@/components/storefront/product-rail";
 import { getSessionUser } from "@/lib/auth/guards";
+import { getVisitorToken } from "@/lib/cart/cookies";
 import { CONTAINER, GUTTER } from "@/lib/layout";
 import { getProductDetail } from "@/lib/queries/product";
 import { getStoreConfig } from "@/lib/queries/settings";
+import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +47,14 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const product = await getProductDetail(slug);
   if (!product) notFound();
 
-  const [user, config] = await Promise.all([getSessionUser(), getStoreConfig()]);
+  const [user, config, visitorToken] = await Promise.all([
+    getSessionUser(),
+    getStoreConfig(),
+    getVisitorToken(),
+  ]);
+  const recent = await getRecentlyViewed({ userId: user?.id ?? null, token: visitorToken }, [
+    product.id,
+  ]);
   const initialColor = typeof raw.color === "string" ? raw.color.toLowerCase() : null;
 
   const crumbs = [
@@ -92,6 +102,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
         }}
       />
 
+      <RecordView productId={product.id} />
       <div className={cn(CONTAINER, GUTTER, "flex flex-col gap-12 py-6 pb-28 md:py-10 lg:pb-16")}>
         <Breadcrumbs items={crumbs} />
 
@@ -127,6 +138,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
       ) : null}
       {product.similar.length > 0 ? (
         <ProductRail id="you-may-also-like" title="You may also like" products={product.similar} />
+      ) : null}
+      {recent.length > 0 ? (
+        <ProductRail id="recently-viewed" title="Recently viewed" products={recent} />
       ) : null}
     </>
   );

@@ -4,12 +4,14 @@ import { headers } from "next/headers";
 import { z } from "zod";
 
 import { getSessionUser } from "@/lib/auth/guards";
+import { getVisitorToken, newToken, setVisitorToken } from "@/lib/cart/cookies";
 import { db } from "@/lib/db";
 import { estimateDeliveryWindow, formatDeliveryWindow } from "@/lib/delivery";
 import { activeProductWhere } from "@/lib/queries/products";
 import { getStoreConfig } from "@/lib/queries/settings";
 import { getShippingZones, lookupPincode } from "@/lib/queries/shipping";
 import { createRateLimiter, retryAfterSeconds } from "@/lib/rate-limit";
+import { recordView } from "@/lib/recently-viewed";
 import { findZoneForPincode, shippingCharge } from "@/lib/shipping";
 import { backInStockSchema, deliveryEstimateSchema } from "@/lib/validations/catalog";
 
@@ -158,4 +160,21 @@ export async function getDeliveryEstimate(input: {
     afterCutoff,
     options,
   };
+}
+
+const recentSchema = z.object({ productId: z.string().trim().min(10).max(40) });
+
+/** Recently viewed, keyed by the user or a visitor cookie that is set here when missing. */
+export async function recordRecentlyViewedAction(input: { productId: string }): Promise<void> {
+  const parsed = recentSchema.safeParse(input);
+  if (!parsed.success) return;
+  const user = await getSessionUser();
+  let token = await getVisitorToken();
+  if (!user && !token) {
+    token = newToken();
+    await setVisitorToken(token);
+  }
+  await recordView({ userId: user?.id ?? null, token }, parsed.data.productId).catch(
+    () => undefined,
+  );
 }
