@@ -44,3 +44,7 @@ playwright/.cache
 
 # playwright mcp session files
 .playwright-mcp
+
+# local file storage and dev mail outbox
+storage/
+.dev-outbox/

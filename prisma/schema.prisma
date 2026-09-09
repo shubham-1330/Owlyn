@@ -670,35 +670,54 @@ model BackInStockRequest {
 // ---------------------------------------------------------------------------
 
 model Order {
-  id              String        @id @default(cuid())
-  orderNumber     String        @unique
-  userId          String?
-  email           String
-  phone           String
-  status          OrderStatus   @default(PENDING)
-  paymentStatus   PaymentStatus @default(PENDING)
-  subtotal        Int
-  discountTotal   Int           @default(0)
-  shippingTotal   Int           @default(0)
-  taxTotal        Int           @default(0)
-  grandTotal      Int
-  currency        String        @default("INR")
-  couponCode      String?
-  shippingMethod  String?
+  id                    String           @id @default(cuid())
+  orderNumber           String           @unique
+  userId                String?
+  email                 String
+  phone                 String
+  status                OrderStatus      @default(PENDING)
+  paymentStatus         PaymentStatus    @default(PENDING)
+  subtotal              Int
+  discountTotal         Int              @default(0)
+  shippingTotal         Int              @default(0)
+  taxTotal              Int              @default(0)
+  grandTotal            Int
+  currency              String           @default("INR")
+  couponCode            String?
+  shippingMethod        String?
   /// Address snapshot: { fullName, phone, line1, line2, landmark, city, state, pincode, country }
-  shippingAddress Json
-  billingAddress  Json
-  notes           String?       @db.Text
-  customerNote    String?
-  ip              String?
-  userAgent       String?
-  placedAt        DateTime?
-  confirmedAt     DateTime?
-  cancelledAt     DateTime?
-  cancelReason    String?
-  deliveredAt     DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  shippingAddress       Json
+  billingAddress        Json
+  notes                 String?          @db.Text
+  customerNote          String?
+  ip                    String?
+  userAgent             String?
+  placedAt              DateTime?
+  confirmedAt           DateTime?
+  cancelledAt           DateTime?
+  cancelReason          String?
+  deliveredAt           DateTime?
+  /// Cart the order was built from; cleared only once the order is confirmed.
+  cartId                String?
+  paymentMethod         PaymentProvider?
+  shippingRateId        String?
+  /// Place of supply for GST: CGST+SGST when the shipping state matches the store state, IGST otherwise.
+  placeOfSupply         String?
+  isInterState          Boolean          @default(false)
+  cgstTotal             Int              @default(0)
+  sgstTotal             Int              @default(0)
+  igstTotal             Int              @default(0)
+  /// Prepaid orders expire (and release their reservations) if payment has not been captured by then.
+  expiresAt             DateTime?
+  needsReview           Boolean          @default(false)
+  reviewReason          String?
+  invoiceNumber         String?          @unique
+  invoiceKey            String?
+  invoicedAt            DateTime?
+  estimatedDeliveryFrom DateTime?
+  estimatedDeliveryTo   DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
 
   user              User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   items             OrderItem[]
@@ -716,6 +735,8 @@ model Order {
   @@index([paymentStatus])
   @@index([email])
   @@index([createdAt])
+  @@index([expiresAt, status, paymentStatus])
+  @@index([needsReview])
 }
 
 /// Immutable snapshot of what was bought. Never joined to live product data for display.
@@ -732,6 +753,8 @@ model OrderItem {
   image     String?
   unitPrice Int
   qty       Int
+  /// Coupon discount allocated to this line, in paise.
+  discount  Int      @default(0)
   taxRate   Int
   taxAmount Int      @default(0)
   hsnCode   String?
@@ -1151,6 +1174,22 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([actorId, createdAt])
   @@index([createdAt])
+}
+
+/// Every provider webhook delivery, keyed by the provider event id so a replay is a no-op.
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String
+  eventId     String
+  event       String
+  payload     Json
+  processedAt DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([provider, eventId])
+  @@index([event, createdAt])
 }
 
 model Setting {

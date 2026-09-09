@@ -14,6 +14,7 @@ export type StoreConfig = {
   freeShippingThreshold: number;
   dispatchCutoffHour: number;
   maxQtyPerLine: number;
+  reservationMinutes: number;
   returnsWindowDays: number;
   warrantyDays: number;
   trendingSearches: string[];
@@ -34,6 +35,7 @@ const DEFAULTS: StoreConfig = {
   freeShippingThreshold: 199_900,
   dispatchCutoffHour: 14,
   maxQtyPerLine: 10,
+  reservationMinutes: 20,
   returnsWindowDays: 7,
   warrantyDays: 90,
   trendingSearches: [],
@@ -89,6 +91,7 @@ export const getStoreConfig = cached(
       freeShippingThreshold: num(s["shipping.freeThreshold"], DEFAULTS.freeShippingThreshold),
       dispatchCutoffHour: num(s["shipping.dispatchCutoffHour"], DEFAULTS.dispatchCutoffHour),
       maxQtyPerLine: num(s["cart.maxQtyPerLine"], DEFAULTS.maxQtyPerLine),
+      reservationMinutes: num(s["orders.reservationMinutes"], DEFAULTS.reservationMinutes),
       returnsWindowDays: num(s["returns.windowDays"], DEFAULTS.returnsWindowDays),
       warrantyDays: num(s["returns.warrantyDays"], DEFAULTS.warrantyDays),
       trendingSearches: strList(s["search.trending"]),

@@ -35,6 +35,7 @@ const cartSelect = {
           stock: true,
           isActive: true,
           weightGrams: true,
+          sku: true,
           product: {
             select: {
               id: true,
@@ -43,6 +44,7 @@ const cartSelect = {
               brandLine: true,
               basePrice: true,
               taxRate: true,
+              hsnCode: true,
               status: true,
               deletedAt: true,
               images: {
@@ -90,7 +92,7 @@ export function toCouponRule(row: {
   return { ...row };
 }
 
-async function couponContext(userId: string | null, couponCode: string | null) {
+export async function couponContextFor(userId: string | null, couponCode: string | null) {
   if (!userId) return { userRedemptions: 0, isFirstOrder: true };
   const [orders, redemptions] = await Promise.all([
     db.order.count({ where: { userId, status: { notIn: ["CANCELLED"] } } }),
@@ -132,7 +134,7 @@ async function buildCart(row: CartRow): Promise<CartData> {
       ? db.coupon.findUnique({ where: { code: row.couponCode } })
       : Promise.resolve(null),
   ]);
-  const ctx = await couponContext(row.userId, row.couponCode);
+  const ctx = await couponContextFor(row.userId, row.couponCode);
 
   const defaultZone = zones.find((z) => z.isDefault) ?? zones[0] ?? null;
   const rate = defaultZone?.rates[0] ?? null;
@@ -195,6 +197,9 @@ async function buildCart(row: CartRow): Promise<CartData> {
       unitPrice,
       priceAtAdd: item.priceAtAdd,
       priceChanged,
+      weightGrams: v.weightGrams,
+      sku: v.sku,
+      hsnCode: p.hsnCode,
     });
   }
 

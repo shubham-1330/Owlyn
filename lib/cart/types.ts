@@ -26,6 +26,9 @@ export type CartLineData = {
   net: number;
   taxRate: number;
   taxAmount: number;
+  weightGrams: number;
+  sku: string;
+  hsnCode: string | null;
 };
 
 export type CartData = {
