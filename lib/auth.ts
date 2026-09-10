@@ -9,12 +9,16 @@ import { verifyPassword } from "@/lib/auth/password";
 import { db } from "@/lib/db";
 import { loginSchema } from "@/lib/validations/auth";
 
-/** How often a live session re-reads role and ban state from the database. */
-const ROLE_REFRESH_MS = 5 * 60 * 1000;
+/**
+ * How often a live session re-reads role, ban state and session version from
+ * the database. A password change bumps the version, so other sessions are
+ * signed out within this interval.
+ */
+const SESSION_CHECK_MS = 30 * 1000;
 
 const credentialsSchema = loginSchema.pick({ email: true, password: true });
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db),
   providers: [
@@ -62,23 +66,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, trigger }) {
-      if (user) {
+      if (user?.id) {
+        const row = await db.user.findUnique({
+          where: { id: user.id },
+          select: { role: true, sessionVersion: true },
+        });
         token.id = user.id;
-        token.role = user.role ?? "CUSTOMER";
+        token.role = row?.role ?? user.role ?? "CUSTOMER";
+        token.sessionVersion = row?.sessionVersion ?? 0;
         token.checkedAt = Date.now();
         return token;
       }
 
-      // Re-read role and ban state periodically so demotions and bans take
-      // effect without waiting for the token to expire.
-      const stale = !token.checkedAt || Date.now() - token.checkedAt > ROLE_REFRESH_MS;
+      // Re-read role, ban state and session version periodically so demotions,
+      // bans and password changes take effect without waiting for expiry.
+      const stale = !token.checkedAt || Date.now() - token.checkedAt > SESSION_CHECK_MS;
       if ((stale || trigger === "update") && token.id) {
         const fresh = await db.user.findUnique({
           where: { id: token.id },
-          select: { role: true, isBanned: true },
+          select: { role: true, isBanned: true, sessionVersion: true, email: true },
         });
         if (!fresh || fresh.isBanned) return null;
+        if (trigger !== "update" && (token.sessionVersion ?? 0) !== fresh.sessionVersion)
+          return null;
         token.role = fresh.role;
+        token.sessionVersion = fresh.sessionVersion;
+        token.email = fresh.email;
         token.checkedAt = Date.now();
       }
       return token;

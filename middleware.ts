@@ -11,7 +11,6 @@ import { authConfig } from "@/lib/auth.config";
 const { auth } = NextAuth(authConfig);
 
 const STAFF_ROLES = new Set(["STAFF", "ADMIN"]);
-const AUTH_PAGES = new Set(["/login", "/register"]);
 
 export default auth((request) => {
   const { nextUrl } = request;
@@ -39,12 +38,11 @@ export default auth((request) => {
     return NextResponse.next();
   }
 
-  if (AUTH_PAGES.has(pathname) && user) {
-    const next = nextUrl.searchParams.get("next");
-    const target = next && next.startsWith("/") && !next.startsWith("//") ? next : "/account";
-    return NextResponse.redirect(new URL(target, nextUrl));
-  }
-
+  // Signed-in visitors are bounced off /login and /register by those pages
+  // themselves, with the full session check. The edge only sees that a JWT
+  // exists, not whether it is still valid (a password change invalidates
+  // other sessions), and bouncing here would loop a stale cookie between
+  // /login and /account.
   return NextResponse.next();
 });
 

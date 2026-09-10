@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { googleEnabled } from "@/lib/auth.config";
+import { getSessionUser } from "@/lib/auth/guards";
 import { safeNextPath } from "@/lib/auth/safe-next";
 
 import { RegisterForm } from "./register-form";
@@ -18,6 +20,7 @@ export default async function RegisterPage({
 }) {
   const params = await searchParams;
   const next = safeNextPath(params.next, "/account?welcome=1");
+  if (await getSessionUser()) redirect(safeNextPath(params.next, "/account"));
 
   return (
     <div className="flex flex-col gap-8">

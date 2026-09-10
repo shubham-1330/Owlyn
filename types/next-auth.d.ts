@@ -29,5 +29,7 @@ declare module "@auth/core/jwt" {
     role?: Role;
     /** Epoch ms of the last time role/ban state was re-read from the database. */
     checkedAt?: number;
+    /** Mirrors User.sessionVersion; a mismatch signs the session out. */
+    sessionVersion?: number;
   }
 }

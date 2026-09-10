@@ -461,21 +461,25 @@ model SizeChart {
 // ---------------------------------------------------------------------------
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  phone         String?
-  phoneVerified DateTime?
-  passwordHash  String?
-  role          Role      @default(CUSTOMER)
-  isBanned      Boolean   @default(false)
-  bannedReason  String?
-  tags          String[]  @default([])
-  lastLoginAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  phone          String?
+  phoneVerified  DateTime?
+  passwordHash   String?
+  role           Role      @default(CUSTOMER)
+  isBanned       Boolean   @default(false)
+  bannedReason   String?
+  /// Bumped on password change; JWTs carrying an older value are rejected.
+  sessionVersion Int       @default(0)
+  /// Email waiting for verification before it replaces `email`.
+  pendingEmail   String?
+  tags           String[]  @default([])
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   accounts            Account[]
   sessions            Session[]
@@ -844,6 +848,8 @@ model ReturnRequest {
   /// Address snapshot for pickup, same shape as Order.shippingAddress.
   pickupAddress Json
   refundId      String?      @unique
+  /// Storage keys of photos the customer attached, served through /api/returns.
+  photoKeys     String[]     @default([])
   resolvedAt    DateTime?
   staffNote     String?
   createdAt     DateTime     @default(now())

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { googleEnabled } from "@/lib/auth.config";
+import { getSessionUser } from "@/lib/auth/guards";
 import { safeNextPath } from "@/lib/auth/safe-next";
 
 import { LoginForm } from "./login-form";
@@ -27,6 +29,8 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const next = safeNextPath(params.next, "/account");
+  // Full session check (role, ban, session version), not the edge's cookie check.
+  if (await getSessionUser()) redirect(next);
   const authError = params.error
     ? (ERROR_MESSAGES[params.error] ?? "Sign-in failed. Try again.")
     : undefined;
