@@ -10,6 +10,8 @@ import {
   OrderShippedEmail,
   RefundProcessedEmail,
 } from "./order-status";
+import { EmailChangeEmail } from "./email-change";
+import { ReturnRequestedEmail } from "./return-requested";
 import type { OrderEmailData } from "./types";
 
 const order: OrderEmailData = {
@@ -95,5 +97,31 @@ describe("order emails render", () => {
         />,
       ),
     ).toContain("refund it in full");
+  });
+  it("email change and return request templates render", async () => {
+    expect(
+      await render(
+        <EmailChangeEmail
+          name="Asha Iyer"
+          verifyUrl="http://localhost:3000/verify-email?token=abc"
+          siteUrl="http://localhost:3000"
+        />,
+      ),
+    ).toContain("verify-email?token=abc");
+    const html = await render(
+      <ReturnRequestedEmail
+        data={{
+          orderNumber: "OWL-2026-000123",
+          customerName: "Asha Iyer",
+          type: "RETURN",
+          items: [{ name: "Hush Court 1", size: "UK 8", color: "Ink", qty: 1 }],
+          pickupCity: "Bengaluru",
+          returnsUrl: "http://localhost:3000/account/returns",
+          siteUrl: "http://localhost:3000",
+        }}
+      />,
+    );
+    expect(html).toContain("We have your return request.");
+    expect(html).toContain("Bengaluru");
   });
 });
