@@ -1,5 +1,6 @@
 import { OrderConfirmationEmail, orderConfirmationSubject } from "@/emails/order-confirmation";
-import { OrderNeedsReviewEmail } from "@/emails/order-status";
+import { OrderCancelledEmail, OrderNeedsReviewEmail } from "@/emails/order-status";
+import { ReturnRequestedEmail } from "@/emails/return-requested";
 import type { OrderEmailData } from "@/emails/types";
 import { db } from "@/lib/db";
 import { formatDeliveryWindow } from "@/lib/delivery";
@@ -118,5 +119,78 @@ export async function notifyOrderNeedsReview(orderId: string): Promise<void> {
     });
   } catch (error) {
     console.error("Needs-review email failed", orderId, error);
+  }
+}
+
+export async function sendOrderCancelledEmail(orderId: string, reason: string): Promise<void> {
+  try {
+    const data = await orderEmailData(orderId);
+    if (!data) return;
+    await sendEmail({
+      to: data.email,
+      subject: `Order ${data.orderNumber} was cancelled`,
+      react: <OrderCancelledEmail order={data} reason={reason} />,
+      tags: { type: "order_cancelled" },
+    });
+    await db.orderEvent.create({
+      data: {
+        orderId,
+        type: "EMAIL",
+        message: "Cancellation email sent.",
+        isCustomerVisible: false,
+      },
+    });
+  } catch (error) {
+    console.error("Cancellation email failed", orderId, error);
+  }
+}
+
+export async function sendReturnRequestedEmail(orderId: string, requestId: string): Promise<void> {
+  try {
+    const request = await db.returnRequest.findUnique({
+      where: { id: requestId },
+      include: {
+        order: { select: { orderNumber: true, email: true, shippingAddress: true } },
+        items: { include: { orderItem: { select: { name: true, size: true, color: true } } } },
+      },
+    });
+    if (!request) return;
+    const shipping = isAddressSnapshot(request.order.shippingAddress)
+      ? request.order.shippingAddress
+      : null;
+    const pickup = isAddressSnapshot(request.pickupAddress) ? request.pickupAddress : shipping;
+    await sendEmail({
+      to: request.order.email,
+      subject: `${request.type === "EXCHANGE" ? "Exchange" : "Return"} request received for ${request.order.orderNumber}`,
+      react: (
+        <ReturnRequestedEmail
+          data={{
+            orderNumber: request.order.orderNumber,
+            customerName: pickup?.fullName ?? shipping?.fullName ?? "there",
+            type: request.type,
+            items: request.items.map((i) => ({
+              name: i.orderItem.name,
+              size: i.orderItem.size,
+              color: i.orderItem.color,
+              qty: i.qty,
+            })),
+            pickupCity: pickup?.city ?? "your address",
+            returnsUrl: absoluteUrl("/account/returns"),
+            siteUrl: absoluteUrl("/"),
+          }}
+        />
+      ),
+      tags: { type: "return_requested" },
+    });
+    await db.orderEvent.create({
+      data: {
+        orderId,
+        type: "EMAIL",
+        message: "Return request email sent.",
+        isCustomerVisible: false,
+      },
+    });
+  } catch (error) {
+    console.error("Return request email failed", orderId, error);
   }
 }
