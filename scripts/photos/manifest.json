@@ -1,0 +1,334 @@
+{
+  "products": {
+    "hush-court-1": {
+      "colors": {
+        "Bone": ["oX5pCZd7ua8", "aC8CeQy5S-I"],
+        "Ink": ["ejV8GVhqG34", "zadrrJWgUDQ"]
+      },
+      "note": "Ink shares its on-foot frame with Hush Ridge."
+    },
+    "hush-court-1-low": {
+      "colors": {
+        "Fog": ["8fwHUu_QaKs", "ikx-OFw-hVo"],
+        "Dusk": ["-IBChkvzob8", "bLeZeQTYNSg"]
+      },
+      "note": "Dusk shown as navy canvas."
+    },
+    "hush-lane": {
+      "colors": {
+        "Moon": ["gGEt1xMn3ak", "ZiBh2yOxB5Q"],
+        "Clay": ["FgC2FDxgh9o", "dgzqL0L3jJk"]
+      }
+    },
+    "hush-ridge": {
+      "colors": {
+        "Slate": ["BDlI_FuKqms", "ejV8GVhqG34"],
+        "Olive": ["BDlI_FuKqms", "ejV8GVhqG34"]
+      },
+      "note": "No plausible olive high-top frame; Olive reuses the Slate photos."
+    },
+    "hush-ember": {
+      "colors": {
+        "Brass": ["EgN1AQ37AuU", "W-BDAR5G69U"],
+        "Ink": ["zadrrJWgUDQ", "ejV8GVhqG34"]
+      },
+      "note": "Ink reuses the Hush Court 1 and Hush Ridge black frames."
+    },
+    "hush-terrace": {
+      "colors": {
+        "Sand": ["ARqzUe8ez_4", "vvzllGGRX6A"],
+        "Storm": ["BDlI_FuKqms", "0lws7e39dY4"]
+      },
+      "note": "Storm reuses the black high-top frame."
+    },
+    "boom-strider-3": {
+      "colors": {
+        "Signal blue": ["8iy5VCa6qMQ", "Y4fKN-RlMV4"],
+        "Ink and brass": ["fVDirKJl8gs", "z5oXjm4dFmQ"]
+      },
+      "note": "Navy knit stands in for Signal blue; Ink and brass shown as dark trail shoes with orange laces."
+    },
+    "boom-long-haul": {
+      "colors": {
+        "Charcoal": ["VeW_kL0isfs", "FZPBDun6FKY"],
+        "Bone": ["TNq9UNVl9aQ", "cHUTaMe92sI"]
+      }
+    },
+    "quill-pace-2": {
+      "colors": {
+        "Moon and brass": ["ujHwkctdQ0I", "7RUvirkSMOY"],
+        "Night": ["-rUhj6BpmX4", "VeW_kL0isfs"]
+      },
+      "note": "Night reuses the dark Boom Long Haul frames."
+    },
+    "quill-tempo": {
+      "colors": {
+        "Dusk": ["8iy5VCa6qMQ", "ZOrOq_3srS8"],
+        "Moss": ["z5oXjm4dFmQ", "cYZfb9VAwEc"]
+      },
+      "note": "Dusk reuses the navy knit frame; Moss shown as dark trail shoes."
+    },
+    "boom-easy-mile": {
+      "colors": {
+        "Blush": ["gGEt1xMn3ak", "W-BDAR5G69U"],
+        "Ink": ["fVDirKJl8gs", "-rUhj6BpmX4"]
+      },
+      "note": "Blush reuses the light Hush Lane frames."
+    },
+    "talon-grip": {
+      "colors": {
+        "Cement": ["FK9cvXuxrLE", "Mr6-xCPeiOs"],
+        "Ink": ["fVDirKJl8gs", "-rUhj6BpmX4"]
+      },
+      "note": "Ink reuses dark trail-shoe frames."
+    },
+    "talon-lift": {
+      "colors": {
+        "Slate": ["-rUhj6BpmX4", "VeW_kL0isfs"],
+        "Rust": ["cht6aJuG3Ks", "cYZfb9VAwEc"]
+      },
+      "note": "Slate reuses the Boom Long Haul charcoal frame."
+    },
+    "talon-circuit": {
+      "colors": {
+        "Fog": ["ujHwkctdQ0I", "7RUvirkSMOY"],
+        "Dusk": ["8iy5VCa6qMQ", "ZOrOq_3srS8"]
+      },
+      "note": "Both colours reuse Quill frames."
+    },
+    "talon-base": {
+      "colors": {
+        "Bone": ["cHUTaMe92sI", "TNq9UNVl9aQ"],
+        "Black": ["-rUhj6BpmX4", "fVDirKJl8gs"]
+      },
+      "note": "Reuses the Boom Long Haul bone frames."
+    },
+    "seam-core-tee-men": {
+      "colors": {
+        "Ink": ["pYDQyzThtLE", "zneickOATGk"],
+        "Moon": ["fTDWpCxLA0k", "Dn8YipJCulA"],
+        "Olive": ["ORbJDeKSMEU", "ogmenj2NGho"]
+      },
+      "note": "Olive shown as a dark tee."
+    },
+    "seam-core-tee-women": {
+      "colors": {
+        "Moon": ["0UBg7jhsSxs", "3px99yvii9s"],
+        "Dusk": ["aRopaNVxN2k", "IAHSiubqw0s"],
+        "Clay": ["4zEx6ApowrE", "xsattfek-7A"]
+      },
+      "note": "Dusk shown as a black top."
+    },
+    "seam-vent-tee": {
+      "colors": {
+        "Storm": ["IBsAB8uiDso", "_iKNFEIVthQ"],
+        "Fog": ["xsattfek-7A", "R6_vumgFkSM"]
+      },
+      "note": "Storm shown in teal."
+    },
+    "seam-long-sleeve-tee": {
+      "colors": {
+        "Charcoal": ["Ft4p5E9HjTQ", "aRopaNVxN2k"],
+        "Sand": ["6v1y5tgcUL0", "BFw2dgUN3EE"]
+      }
+    },
+    "seam-heavy-tee": {
+      "colors": {
+        "Ink": ["zneickOATGk", "ORbJDeKSMEU"],
+        "Bone": ["acn5ERAeSb4", "fiA7sq2PdnQ"]
+      }
+    },
+    "seam-pique-polo-men": {
+      "colors": {
+        "Ink": ["IkIW_n_nQyw", "MF-LklDrX4Q"],
+        "Moss": ["dx5OMBDUVrU", "S7ZEpXFHFAY"],
+        "Moon": ["mRY8PSVR9Og", "Fp1pb_cqlNM"]
+      },
+      "note": "Moss shown as grey marl."
+    },
+    "seam-pique-polo-women": {
+      "colors": {
+        "Moon": ["mRY8PSVR9Og", "xwnglFEJ-Uw"],
+        "Dusk": ["534LD7kj8Vo", "acDOZXe5UtQ"]
+      },
+      "note": "Moon reuses the men's white polo frames."
+    },
+    "seam-court-polo": {
+      "colors": {
+        "Bone": ["hZlTU_ViPCs", "6G8Z-pe2UoU"],
+        "Slate": ["Do7MphCSceM", "oZ28JLsUsV8"]
+      }
+    },
+    "seam-shell-jacket-men": {
+      "colors": {
+        "Ink": ["oaeBCfxYAMY", "R1wQZwDGoCg"],
+        "Olive": ["6qtMfdOgGg0", "pj5-2PVloXE"]
+      }
+    },
+    "seam-shell-jacket-women": {
+      "colors": {
+        "Ink": ["R1wQZwDGoCg", "oaeBCfxYAMY"],
+        "Dusk": ["pj4e-hW-e5w", "dAZpZVy_qUc"]
+      },
+      "note": "Ink reuses the men's shell frames; Dusk shown in blue."
+    },
+    "seam-quilt-jacket": {
+      "colors": {
+        "Charcoal": ["lOi-N7CFGvg", "uLWk3kDXBgU"],
+        "Sand": ["6u56D2Qph8M", "87m1_NfKld4"]
+      }
+    },
+    "seam-crew-sweat": {
+      "colors": {
+        "Fog": ["58OB2jCMieU", "IyBoulaZsNA"],
+        "Ink": ["-4kwwL-iZ2Q", "lETfyhB8g4Q"],
+        "Moss": ["BUk-2u_VMwQ", "4w_Yqqsb8s8"]
+      },
+      "note": "Moss shown in mustard."
+    },
+    "seam-hood-men": {
+      "colors": {
+        "Ink": ["lETfyhB8g4Q", "KMwpYURfx6E"],
+        "Bone": ["VoP2WK9rTa4", "NezSr__TVFQ"]
+      }
+    },
+    "seam-hood-women": {
+      "colors": {
+        "Blush": ["dN67hPE5KWY", "Cglj4LP4GTQ"],
+        "Slate": ["x00wIOG5FJc", "IyBoulaZsNA"]
+      }
+    },
+    "seam-track-jogger-men": {
+      "colors": {
+        "Ink": ["_yPf_vbwrBA", "W1VIOlGCPZg"],
+        "Charcoal": ["_V41KmkWlEQ", "eyFcZLLYvfA"]
+      }
+    },
+    "seam-track-jogger-women": {
+      "colors": {
+        "Ink": ["_yPf_vbwrBA", "4IlAsyyyMJs"],
+        "Dusk": ["ZVr1p19TBCA", "rUYYg6C181k"]
+      },
+      "note": "Dusk shown in lilac."
+    },
+    "seam-loft-jogger": {
+      "colors": {
+        "Fog": ["_V41KmkWlEQ", "4IlAsyyyMJs"],
+        "Sand": ["_AdLRz6y4r0", "1a7hraVPY90"]
+      }
+    },
+    "seam-split-short-men": {
+      "colors": {
+        "Ink": ["xs6J_nzM8T0", "dmDJkhPFOXo"],
+        "Storm": ["7tMKyuV-9yo", "wbNL7hPVh_o"]
+      }
+    },
+    "seam-split-short-women": {
+      "colors": {
+        "Ink": ["QkCkz_J9gE0", "l8ZfRLXiurw"],
+        "Moss": ["7bkKzV2j_ZM", "XlA6Is7E3lk"]
+      },
+      "note": "Moss shown in teal and light blue."
+    },
+    "seam-court-short": {
+      "colors": {
+        "Bone": ["JE3LvJSVCE0", "ti4panWqSWE"],
+        "Slate": ["zNyyLu6WbqA", "vV-mqqsoJ70"]
+      }
+    },
+    "roost-six-panel-cap": {
+      "colors": {
+        "Ink": ["kQXikMNwUPc", "xRVSrfNG6fA"],
+        "Bone": ["gcZcCqpGEw0", "lnhy2DNK3nE"],
+        "Olive": ["SrZ93ZieLOg", "3eSEna9YXPQ"]
+      },
+      "note": "Olive shown in tan."
+    },
+    "roost-run-cap": {
+      "colors": {
+        "Moon": ["t8HiP3e5abg", "DT7ercyDWjs"],
+        "Storm": ["0_TYdO-ZXQc", "BCf6X_MfQck"]
+      }
+    },
+    "roost-crew-sock-3-pack": {
+      "colors": {
+        "Ink": ["bPZjkCnmyQw", "fjqZqwbDeN0"],
+        "Moon": ["oLewviZM_mc", "T3A-depWto8"]
+      }
+    },
+    "roost-run-sock-2-pack": {
+      "colors": {
+        "Moon": ["Y0lUBKt-AZI", "90kNrvWerXs"],
+        "Storm": ["8Al2ylhlCYk", "fjqZqwbDeN0"]
+      },
+      "note": "Storm shown as dark green ribbed socks."
+    },
+    "roost-gym-duffel": {
+      "colors": {
+        "Ink": ["1jwXAMjd-rQ", "lFvkXTEYS4s"],
+        "Olive": ["MZ6QNLG2tvY", "M0g1sV4SEdo"]
+      }
+    }
+  },
+  "categories": {
+    "men": "CVPxdBe0wEU",
+    "women": "2cSiUpeySm0",
+    "men-footwear": "EgN1AQ37AuU",
+    "women-footwear": "W-BDAR5G69U",
+    "men-clothing": "NezSr__TVFQ",
+    "women-clothing": "-4kwwL-iZ2Q",
+    "men-accessories": "1jwXAMjd-rQ",
+    "women-accessories": "gcZcCqpGEw0",
+    "men-sneakers": "aC8CeQy5S-I",
+    "women-sneakers": "gGEt1xMn3ak",
+    "men-running-shoes": "VeW_kL0isfs",
+    "women-running-shoes": "TNq9UNVl9aQ",
+    "men-training-shoes": "7RUvirkSMOY",
+    "women-training-shoes": "dsYT3BIHb3Q",
+    "men-t-shirts": "fTDWpCxLA0k",
+    "women-t-shirts": "0UBg7jhsSxs",
+    "men-polos": "mRY8PSVR9Og",
+    "women-polos": "534LD7kj8Vo",
+    "men-jackets": "uLWk3kDXBgU",
+    "women-jackets": "y42YWRhBD60",
+    "men-sweatshirts": "lETfyhB8g4Q",
+    "women-sweatshirts": "dN67hPE5KWY",
+    "men-joggers": "_yPf_vbwrBA",
+    "women-joggers": "ZVr1p19TBCA",
+    "men-shorts": "wbNL7hPVh_o",
+    "women-shorts": "XlA6Is7E3lk",
+    "men-caps": "kQXikMNwUPc",
+    "women-caps": "K7ADMFTwxac",
+    "men-socks": "bPZjkCnmyQw",
+    "women-socks": "PB32ec426ho",
+    "men-bags": "lFvkXTEYS4s",
+    "women-bags": "QU1DQypmNnc"
+  },
+  "collections": {
+    "night-run": "E3QQB9MMLCE",
+    "court-edit": "EgN1AQ37AuU",
+    "cold-start": "1-nuy7fD3fw"
+  },
+  "banners": {
+    "seed-banner-hero-autumn": {
+      "id": "mZixsK8OnmE",
+      "shape": "banner"
+    },
+    "seed-banner-hero-court": {
+      "id": "pcfPwGKnrIU",
+      "shape": "banner"
+    },
+    "seed-banner-home-cold-start": {
+      "id": "1-nuy7fD3fw",
+      "shape": "banner"
+    },
+    "seed-banner-editorial-men": {
+      "id": "CVPxdBe0wEU",
+      "shape": "tall"
+    },
+    "seed-banner-editorial-women": {
+      "id": "2cSiUpeySm0",
+      "shape": "tall"
+    }
+  }
+}

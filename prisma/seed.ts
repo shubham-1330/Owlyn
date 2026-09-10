@@ -23,6 +23,13 @@ import { pincodes, zones } from "./seed/data/shipping";
 import { sizeCharts } from "./seed/data/size-charts";
 import { users } from "./seed/data/users";
 import { blurDataUri, productSvg, tileSvg, writeSvg } from "./seed/lib/placeholders";
+import {
+  bannerPhotos,
+  categoryPhotos,
+  collectionPhotos,
+  photoBlur,
+  productPhotos,
+} from "./seed/data/photos";
 import { reviewers, reviews } from "./seed/data/reviews";
 import { createRandom } from "./seed/lib/random";
 
@@ -143,28 +150,30 @@ async function seedCategories(sizeChartIds: Map<string, string>) {
   async function walk(nodes: CategorySeed[], parentId: string | null, depth: number) {
     for (const [i, node] of nodes.entries()) {
       const isLeaf = !node.children?.length;
-      const image = isLeaf
-        ? writeSvg(
-            `images/categories/${node.slug}.svg`,
-            tileSvg({
-              title: node.name,
-              subtitle: parentId ? undefined : node.description,
-              width: 800,
-              height: 1000,
-              bg: depth === 0 ? "#1B2129" : "#46407A",
-              accent: "#C79A4B",
-            }),
-          )
-        : writeSvg(
-            `images/categories/${node.slug}.svg`,
-            tileSvg({
-              title: node.name,
-              width: 800,
-              height: 1000,
-              bg: depth === 0 ? "#0E1116" : "#1B2129",
-              accent: depth === 0 ? "#C79A4B" : "#46407A",
-            }),
-          );
+      const image = categoryPhotos[node.slug]
+        ? categoryPhotos[node.slug]!
+        : isLeaf
+          ? writeSvg(
+              `images/categories/${node.slug}.svg`,
+              tileSvg({
+                title: node.name,
+                subtitle: parentId ? undefined : node.description,
+                width: 800,
+                height: 1000,
+                bg: depth === 0 ? "#1B2129" : "#46407A",
+                accent: "#C79A4B",
+              }),
+            )
+          : writeSvg(
+              `images/categories/${node.slug}.svg`,
+              tileSvg({
+                title: node.name,
+                width: 800,
+                height: 1000,
+                bg: depth === 0 ? "#0E1116" : "#1B2129",
+                accent: depth === 0 ? "#C79A4B" : "#46407A",
+              }),
+            );
       const data = {
         name: node.name,
         description: node.description,
@@ -195,17 +204,19 @@ async function seedCategories(sizeChartIds: Map<string, string>) {
 async function seedCollections() {
   const ids = new Map<string, string>();
   for (const [i, c] of collections.entries()) {
-    const heroImage = writeSvg(
-      `images/collections/${c.slug}.svg`,
-      tileSvg({
-        title: c.name,
-        subtitle: c.metaDescription,
-        width: 1600,
-        height: 900,
-        bg: c.bg,
-        accent: c.accent,
-      }),
-    );
+    const heroImage =
+      collectionPhotos[c.slug] ??
+      writeSvg(
+        `images/collections/${c.slug}.svg`,
+        tileSvg({
+          title: c.name,
+          subtitle: c.metaDescription,
+          width: 1600,
+          height: 900,
+          bg: c.bg,
+          accent: c.accent,
+        }),
+      );
     const data = {
       name: c.name,
       description: c.description,
@@ -327,6 +338,26 @@ async function seedProduct(p: ProductSeed, ids: CatalogIds) {
   let imagePosition = 0;
   for (const color of p.colors) {
     const firstVariant = variantsByColor.find((v) => v.colorName === color.name);
+    const shots = productPhotos[p.slug]?.colors[color.name];
+    if (shots && shots.length > 0) {
+      for (const [i, url] of shots.entries()) {
+        await db.productImage.create({
+          data: {
+            productId: product.id,
+            variantId: firstVariant?.id ?? null,
+            url,
+            alt: `${p.name} in ${color.name}${i > 0 ? ", detail" : ""}`,
+            width: 1200,
+            height: 1600,
+            blurData: photoBlur[url] ?? blurDataUri(color.hex),
+            position: imagePosition,
+            isPrimary: imagePosition === 0,
+          },
+        });
+        imagePosition += 1;
+      }
+      continue;
+    }
     for (const view of [1, 2] as const) {
       const url = writeSvg(
         `images/products/${p.slug}-${slugify(color.name)}-${view}.svg`,
@@ -515,19 +546,42 @@ async function seedPages() {
   return pages.length;
 }
 
+/** Menu tiles in content.ts point at the generated tiles; use the photograph when one exists. */
+function remapMenuImage(image: string | undefined): string | null {
+  if (!image) return null;
+  const m = image.match(/^\/images\/(collections|banners|categories)\/([a-z0-9-]+)\.svg$/);
+  if (!m) return image;
+  const [, kind, slug] = m;
+  if (kind === "collections") return collectionPhotos[slug!] ?? image;
+  if (kind === "categories") return categoryPhotos[slug!] ?? image;
+  return bannerPhotos[`seed-banner-${slug}`] ?? image;
+}
+
+/** Homepage section config carries tile images; point them at the photographs too. */
+function remapSectionImages(config: Record<string, unknown>): Record<string, unknown> {
+  const tiles = (config as { tiles?: Array<{ image?: string }> }).tiles;
+  if (!Array.isArray(tiles)) return config;
+  return {
+    ...config,
+    tiles: tiles.map((t) => ({ ...t, image: remapMenuImage(t.image) ?? t.image })),
+  };
+}
+
 async function seedContent() {
   for (const b of banners) {
-    const image = writeSvg(
-      `images/banners/${b.id.replace("seed-banner-", "")}.svg`,
-      tileSvg({
-        title: b.headline,
-        subtitle: b.subhead,
-        width: b.width,
-        height: b.height,
-        bg: b.bg,
-        accent: b.accent,
-      }),
-    );
+    const image =
+      bannerPhotos[b.id] ??
+      writeSvg(
+        `images/banners/${b.id.replace("seed-banner-", "")}.svg`,
+        tileSvg({
+          title: b.headline,
+          subtitle: b.subhead,
+          width: b.width,
+          height: b.height,
+          bg: b.bg,
+          accent: b.accent,
+        }),
+      );
     const data = {
       slot: b.slot,
       name: b.name,
@@ -552,7 +606,7 @@ async function seedContent() {
         label: item.label,
         url: item.url,
         group: item.group ?? null,
-        image: item.image ?? null,
+        image: remapMenuImage(item.image),
         parentId,
         position: i,
         isActive: true,
@@ -574,7 +628,7 @@ async function seedContent() {
       title: s.title,
       position: i,
       isActive: true,
-      config: (s.config ?? {}) as Prisma.InputJsonValue,
+      config: remapSectionImages(s.config ?? {}) as Prisma.InputJsonValue,
     };
     await db.homepageSection.upsert({
       where: { key: s.key },

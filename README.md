@@ -96,6 +96,8 @@ Unpaid orders hold stock for `orders.reservationMinutes` (seeded: 20). `vercel.j
 
 One-off: `pnpm exec tsx scripts/explain-catalog.ts` prints `EXPLAIN ANALYZE` for the heaviest listing query.
 
+Imagery: `scripts/photos/` holds the Unsplash search, review and download scripts and the `manifest.json` that maps every product colour, category, collection and banner to a photo id. `node scripts/photos/download.mjs` regenerates `public/images/photos/`, `prisma/seed/data/photos.ts` and the credits table in ASSETS.md; run `pnpm db:seed` afterwards. See ASSETS.md for licences and stand-ins.
+
 `pnpm test:e2e` expects `pnpm build` to have run; it reuses a server on :3000 or starts `pnpm start`. If Playwright cannot download its Chromium, run it on an installed browser with `PLAYWRIGHT_CHANNEL=chrome` (or `msedge`). The Razorpay test is skipped unless `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` and `RAZORPAY_WEBHOOK_SECRET` are set; cash on delivery runs everywhere.
 
 ## Project layout
@@ -185,7 +187,7 @@ Reads go through `lib/queries/` and are cached with tags, so a publish can call 
 
 - Money is always an integer number of paise. Format with `formatINR` from `lib/money.ts`.
 - GST rates are whole percents on the product. `lib/tax.ts` picks the rate from the HSN code and price.
-- Brand colours, type scale and radius live in `app/globals.css`. The storefront is dark by default; the admin wraps its layout in `.theme-admin` for the light palette.
+- Brand colours, type scale and radius live in `app/globals.css`. Both the storefront and the admin sit on `--paper`; the admin is told apart by its ink sidebar (`.surface-ink`) and ink primary buttons (`.theme-admin`). Hex values for emails, the invoice PDF and the Razorpay modal come from `lib/brand.ts`, kept in step with the CSS. `pnpm exec tsx scripts/contrast.ts` prints the WCAG ratios.
 - Server Actions for mutations. Route handlers only for webhooks and public APIs.
 - Every protected page calls a guard from `lib/auth/guards.ts`. Middleware is a convenience, not the check.
 - Order totals come from `lib/pricing.priceCart` and nowhere else. Checkout, the shipping quote and order creation all call it; the client sends ids and quantities only.

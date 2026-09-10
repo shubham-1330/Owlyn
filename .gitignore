@@ -48,3 +48,4 @@ playwright/.cache
 # local file storage and dev mail outbox
 storage/
 .dev-outbox/
+scripts/photos/out/

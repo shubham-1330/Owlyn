@@ -1,5 +1,51 @@
 # Progress
 
+## Retheme to paper, and photography (done)
+
+CLAUDE.md §3 was rewritten first (paper palette, admin device in §6), then the code.
+
+### Tokens
+
+Every colour on the site goes through the CSS variables in `app/globals.css`. The brand seven from §3 plus a short list of working tints: `--moon` (light text on ink surfaces and over photo scrims), `--fog-3` (muted text that also passes on slate), `--slate-2` (hover, track and disabled fills), `--fog-2` (dividers on paper, muted text on ink), `--talon-2` (brass hover), `--talon-3` (brass on ink), `--alert-2` (error text). `lib/brand.ts` carries the same hex values for the three places CSS cannot reach: React Email inline styles, the invoice PDF and the Razorpay modal theme. A repo-wide grep for hex, `rgb()` and Tailwind palette classes finds nothing outside those files and `globals.css`. `.theme-admin` now only swaps primary to ink and the ring to dusk; `.surface-ink` is the token set for the admin sidebar.
+
+### Header
+
+Solid paper from the top on every page, with a hairline. The old transparent-over-hero state was removed rather than kept behind a scrim: with real photography under it neither ink nor moon text is reliably legible, a scrim strong enough to guarantee 4.5:1 would visibly stain the hero, and a header that flips colour on scroll is one more thing to get wrong. The hero starts below the header instead of running under it.
+
+### Contrast, as measured (`pnpm exec tsx scripts/contrast.ts`)
+
+| Pair                                                          |                              Ratio | Needs |
+| ------------------------------------------------------------- | ---------------------------------: | ----: |
+| Body text, ink on paper                                       |                              16.30 |   4.5 |
+| Muted text, fog on paper                                      |                               4.62 |   4.5 |
+| Muted text, fog on slate (failed, so muted text uses fog-3)   |                               4.00 |   4.5 |
+| Muted text, fog-3 on paper / on slate                         |                        5.96 / 5.17 |   4.5 |
+| Price emphasis, talon on paper                                |                               4.64 |   4.5 |
+| Talon on slate (failed; brass totals moved onto paper panels) |                               4.02 |   4.5 |
+| Primary button, paper on talon / hover on talon-2             |                        4.64 / 6.54 |   4.5 |
+| Badges: moon on talon / dusk / alert / success / ink          | 4.64 / 10.30 / 6.33 / 5.90 / 15.96 |   4.5 |
+| Muted badge and disabled controls, fog-3 on slate-2           |                               4.62 |   4.5 |
+| Error text, alert-2 on paper                                  |                               7.90 |   4.5 |
+| Success text on paper / on slate                              |                        5.90 / 5.12 |   4.5 |
+| Focus ring, talon on paper / on slate                         |                        4.64 / 4.02 |     3 |
+| Input border, fog on paper                                    |                               4.62 |     3 |
+| Free-shipping bar, talon fill on slate-2 track                |                               3.60 |     3 |
+| Sold-out card: ink text on paper, image dimmed to 70%         |                              16.30 |   4.5 |
+| Scrim text, moon over the ink scrim on a mid-grey photo       |                               9.12 |   4.5 |
+| Selection, moon on talon                                      |                               4.64 |   4.5 |
+
+Two things were fixed rather than reported: muted text on slate surfaces (cart footer, timeline block, checkout summary) was 4.00, so `--muted-foreground` is fog-3 everywhere; and the brass total on slate panels was 4.02, so those panels sit on paper with a hairline. Disabled buttons used 50% opacity, which measured 1.97 for text against the button; they now use a solid slate-2 fill with fog-3 text at 4.62 (disabled controls are exempt from the requirement, but this is readable).
+
+Image containers carry a `--slate` wash and a hairline border so white-background product shots keep an edge on paper.
+
+### Photography
+
+- Source: Unsplash only (Pexels returns 403 from this network). Candidates were searched per subject, Unsplash+ results and brand-named descriptions filtered out, and every pick vetted twice: on a numbered contact sheet and again at 400 px. Rejected at close range: Vans, Puma, New Era, Jacquemus, Herschel, Salewa, Altra, Asics, adidas and Under Armour marks, a Nordstrom bag, a "Common Projects" sleeve. One survivor slipped through to the PDP (a Puma wordmark on the heel of the Ink court shoe, hidden at thumbnail size) and was replaced after the browser check.
+- Every seeded product has two frames per colour; the listing hover swap uses the second. Colourways without a plausible frame reuse another colour's frames and say so in the manifest note (Hush Ridge Olive, Hush Terrace Storm, Talon Circuit, Talon Base, several teal and lilac stand-ins for Storm and Dusk). Categories, collections, banners and menu tiles are mapped too.
+- Files: 145 WebP files under `public/images/photos/`, 3:4 at 1200 × 1600 for products and tiles, 16:9 or 4:5 for banners, quality 80, attention-weighted crop, 17 MB total, largest 570 KB. Git objects for the repo are under 20 MB, so no further downscaling was needed. Each file has a 16 px inline blur placeholder generated from its own crop.
+- Alt text is "`<product> in <colour>`" with ", detail" on the second frame. ASSETS.md lists every photo id, photographer, page and licence and which products use it; the SVG placeholder generator remains only as a fallback for anything without a photo.
+- Verified in a real browser at 1440 px and 375 px: home, a PLP, a PDP with a colour switch (gallery and thumbnails swap), the cart drawer, checkout step 2, and a 404.
+
 ## Phase 6: Account area (done)
 
 Authorization is the theme. Every route here reads a resource by id, so every read and write takes the user id into the query itself and treats a miss as "does not exist".
