@@ -69,8 +69,8 @@ export function OrderTimeline({
               <span
                 className={cn(
                   "relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-medium num",
-                  done && "border-talon bg-talon text-ink",
-                  current && "border-talon bg-ink text-talon",
+                  done && "border-talon bg-talon text-moon",
+                  current && "border-talon bg-background text-talon",
                   step.state === "upcoming" && "border-border bg-transparent text-muted-foreground",
                 )}
               >

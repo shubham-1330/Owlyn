@@ -46,7 +46,7 @@ export function Modal({
             </div>
             <Dialog.Close
               aria-label="Close"
-              className="-mt-1 -mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-sm hover:bg-moon/10"
+              className="-mt-1 -mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-sm hover:bg-ink/5"
             >
               <X className="size-5" aria-hidden />
             </Dialog.Close>

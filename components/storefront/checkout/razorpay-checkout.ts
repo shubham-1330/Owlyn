@@ -1,5 +1,7 @@
 "use client";
 
+import { BRAND } from "@/lib/brand";
+
 const SCRIPT_URL = "https://checkout.razorpay.com/v1/checkout.js";
 
 let loading: Promise<boolean> | null = null;
@@ -61,7 +63,7 @@ export async function openRazorpay(input: OpenRazorpayInput): Promise<RazorpayOu
       description: input.description,
       prefill: input.prefill,
       notes: input.notes,
-      theme: { color: "#c79a4b", backdrop_color: "rgba(14, 17, 22, 0.8)" },
+      theme: { color: BRAND.talon, backdrop_color: BRAND.backdrop },
       retry: { enabled: true },
       handler: (response) => done({ status: "success", response }),
       modal: { ondismiss: () => done({ status: "dismissed" }), escape: true, confirm_close: true },

@@ -35,7 +35,7 @@ export function MobileFilters({
         <Dialog.Overlay className="fixed inset-0 z-50 bg-ink/70 data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in lg:hidden" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-y-0 left-0 z-50 flex w-full max-w-sm flex-col bg-ink text-foreground data-[state=closed]:animate-slide-out-left data-[state=open]:animate-slide-in-left lg:hidden"
+          className="fixed inset-y-0 left-0 z-50 flex w-full max-w-sm flex-col bg-background text-foreground data-[state=closed]:animate-slide-out-left data-[state=open]:animate-slide-in-left lg:hidden"
         >
           <div className="flex h-16 shrink-0 items-center justify-between px-5">
             <Dialog.Title className="font-display text-lg font-bold tracking-tight">
@@ -43,7 +43,7 @@ export function MobileFilters({
             </Dialog.Title>
             <Dialog.Close
               aria-label="Close filters"
-              className="-mr-2 inline-flex size-10 items-center justify-center rounded-sm hover:bg-moon/10"
+              className="-mr-2 inline-flex size-10 items-center justify-center rounded-sm hover:bg-ink/5"
             >
               <X className="size-5" aria-hidden />
             </Dialog.Close>

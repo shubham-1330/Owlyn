@@ -60,7 +60,7 @@ export default async function CheckoutSuccessPage({ params, searchParams }: Prop
               {order.items.map((item) => (
                 <li key={item.id} className="flex items-center gap-4 py-4">
                   <div
-                    className="relative w-16 shrink-0 overflow-hidden bg-slate"
+                    className="relative w-16 shrink-0 overflow-hidden border border-border bg-slate"
                     style={{ aspectRatio: "3 / 4" }}
                   >
                     {item.image ? (
@@ -155,7 +155,7 @@ export default async function CheckoutSuccessPage({ params, searchParams }: Prop
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start" aria-label="Order totals">
-          <dl className="flex flex-col gap-2 border border-border bg-slate p-5 text-sm num">
+          <dl className="flex flex-col gap-2 border border-border bg-background p-5 text-sm num">
             <div className="flex justify-between">
               <dt className="text-muted-foreground">Subtotal</dt>
               <dd>{formatINR(order.subtotal)}</dd>

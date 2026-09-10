@@ -29,7 +29,7 @@ function CheckBox({ active }: { active: boolean }) {
       aria-hidden
       className={cn(
         "flex size-4 shrink-0 items-center justify-center rounded-xs border transition-colors",
-        active ? "border-talon bg-talon text-ink" : "border-fog group-hover:border-foreground",
+        active ? "border-talon bg-talon text-moon" : "border-fog group-hover:border-foreground",
       )}
     >
       {active ? <Check className="size-3" strokeWidth={3} /> : null}
@@ -113,7 +113,7 @@ function ListGroup({
                     <span
                       aria-hidden
                       className="size-4 shrink-0 border border-fog-2"
-                      style={{ backgroundColor: o.hex ?? "#8b9199" }}
+                      style={{ backgroundColor: o.hex ?? "var(--fog)" }}
                     />
                   ) : null}
                   {o.label}

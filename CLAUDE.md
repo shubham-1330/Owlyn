@@ -59,15 +59,15 @@ Do not produce a generic AI-looking template. Follow these tokens exactly, then 
 
 ### Colour tokens (`app/globals.css` as CSS vars)
 ```
---ink:      #0E1116   /* near-black base, cool                    */
---slate:    #1B2129   /* raised surfaces, nav, footer             */
---moon:     #F3F4F2   /* light background / text on dark          */
---talon:    #C79A4B   /* brass accent — CTAs, price emphasis      */
---dusk:     #46407A   /* secondary accent, category tints         */
---fog:      #8B9199   /* muted text, borders                      */
---alert:    #C1462F   /* errors, low-stock, sale                  */
+--paper:  #F7F6F3   /* off-white base, very slightly warm, NOT #F4F1EA */
+--ink:    #17191C   /* body text, headings                            */
+--slate:  #E8E6E1   /* raised surfaces, borders, section bands        */
+--talon:  #8A6A2F   /* brass accent, darkened for AA on paper         */
+--dusk:   #3B3566   /* secondary accent                               */
+--fog:    #6B7076   /* muted text — must hit 4.5:1 on paper           */
+--alert:  #A3341F
 ```
-Dark-first storefront (ink base, moon text). Admin dashboard is light (moon base, ink text) so the two never get confused.
+Light storefront (paper base, ink text). Text over photography and on ink surfaces uses a light working tint (`--moon`) defined in `globals.css`, not a brand token. The admin dashboard shares the paper base and is told apart by its dark ink sidebar and a persistent "Admin" label (see §6).
 
 ### Type
 - Display / headings: **Archivo** (use Expanded + weights 600–800), tight leading, sentence case.
@@ -183,7 +183,7 @@ Order confirmation email + order timeline UI (Confirmed → Packed → Shipped �
 
 ## 6. Admin dashboard (`/admin`, role STAFF or ADMIN)
 
-Separate layout: light theme, left sidebar, command palette (⌘K), data tables with server-side pagination, sorting, column filters, bulk actions and CSV export.
+Separate layout: the same `--paper` base as the storefront, a dark `--ink` left sidebar (moon text) and a persistent "Admin" label in the top bar so the two are never confused; command palette (⌘K), data tables with server-side pagination, sorting, column filters, bulk actions and CSV export.
 
 **Overview** — revenue today/7d/30d with sparkline, orders count, AOV, conversion, top products, low-stock alerts, recent orders, revenue chart with date-range picker, traffic-to-order funnel.
 

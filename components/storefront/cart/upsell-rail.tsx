@@ -29,7 +29,7 @@ export function UpsellRail({
               <div className="relative">
                 <Link
                   href={`/products/${product.slug}`}
-                  className="relative block aspect-[3/4] overflow-hidden bg-slate"
+                  className="relative block aspect-[3/4] overflow-hidden border border-border bg-slate"
                 >
                   {image ? (
                     <Image

@@ -1,6 +1,8 @@
 import { Button, Link, Section, Text } from "@react-email/components";
 import * as React from "react";
 
+import { BRAND } from "@/lib/brand";
+
 import { formatINR } from "@/lib/money";
 
 import { EmailLayout, emailStyles } from "./layout";
@@ -62,7 +64,7 @@ export function OrderDeliveredEmail({ order }: { order: OrderEmailData }) {
       </Text>
       <Text style={emailStyles.text}>
         Wrong size? Exchanges are free within 7 days of delivery, unworn with tags.{" "}
-        <Link href={order.orderUrl} style={{ color: "#46407a" }}>
+        <Link href={order.orderUrl} style={{ color: BRAND.dusk }}>
           Start a return or exchange
         </Link>
         .

@@ -12,6 +12,8 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
+import { BRAND } from "@/lib/brand";
+
 /**
  * Shared email shell. Inline styles only: email clients ignore stylesheets.
  * Dark storefront palette is not used in email; ink text on moon reads
@@ -20,18 +22,18 @@ import * as React from "react";
 
 export const emailStyles = {
   body: {
-    backgroundColor: "#f3f4f2",
+    backgroundColor: BRAND.slate,
     fontFamily: "'Inter Tight', Inter, Helvetica, Arial, sans-serif",
-    color: "#0e1116",
+    color: BRAND.ink,
     margin: 0,
     padding: "24px 0",
   },
   container: {
-    backgroundColor: "#ffffff",
+    backgroundColor: BRAND.paper,
     maxWidth: "560px",
     margin: "0 auto",
     padding: "32px 28px",
-    border: "1px solid #d3d6d2",
+    border: `1px solid ${BRAND.hairline}`,
   },
   wordmark: {
     fontFamily: "Archivo, 'Inter Tight', Helvetica, Arial, sans-serif",
@@ -39,7 +41,7 @@ export const emailStyles = {
     fontWeight: 700 as const,
     letterSpacing: "-0.04em",
     margin: "0 0 24px",
-    color: "#0e1116",
+    color: BRAND.ink,
   },
   heading: {
     fontFamily: "Archivo, 'Inter Tight', Helvetica, Arial, sans-serif",
@@ -50,12 +52,12 @@ export const emailStyles = {
     margin: "0 0 12px",
   },
   text: { fontSize: "15px", lineHeight: "1.55", margin: "0 0 12px" },
-  muted: { fontSize: "13px", lineHeight: "1.5", color: "#5c636b", margin: "0 0 8px" },
-  hr: { borderColor: "#d3d6d2", margin: "20px 0" },
+  muted: { fontSize: "13px", lineHeight: "1.5", color: BRAND.fogText, margin: "0 0 8px" },
+  hr: { borderColor: BRAND.hairline, margin: "20px 0" },
   button: {
     display: "inline-block",
-    backgroundColor: "#c79a4b",
-    color: "#0e1116",
+    backgroundColor: BRAND.talon,
+    color: BRAND.moon,
     fontSize: "14px",
     fontWeight: 600 as const,
     padding: "12px 20px",
@@ -102,11 +104,11 @@ export function EmailLayout({
             </Text>
             <Text style={emailStyles.muted}>
               Questions? Reply to this email or write to{" "}
-              <Link href="mailto:support@owlyn.example" style={{ color: "#46407a" }}>
+              <Link href="mailto:support@owlyn.example" style={{ color: BRAND.dusk }}>
                 support@owlyn.example
               </Link>
               .{" "}
-              <Link href={`${siteUrl}/pages/returns`} style={{ color: "#46407a" }}>
+              <Link href={`${siteUrl}/pages/returns`} style={{ color: BRAND.dusk }}>
                 Returns policy
               </Link>
               .

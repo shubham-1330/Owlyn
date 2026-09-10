@@ -713,7 +713,7 @@ function StepHeading({
             done
               ? "bg-success text-moon"
               : active
-                ? "bg-talon text-ink"
+                ? "bg-talon text-moon"
                 : "bg-muted text-muted-foreground",
           )}
           aria-hidden

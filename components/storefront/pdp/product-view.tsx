@@ -233,7 +233,7 @@ export function ProductView({
                       className={cn(
                         "h-11 rounded-sm border text-sm num transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
                         selected
-                          ? "border-foreground bg-foreground text-ink"
+                          ? "border-foreground bg-foreground text-background"
                           : "border-border hover:border-foreground",
                         out && !selected && "text-muted-foreground line-through",
                         out && selected && "bg-muted text-muted-foreground line-through",

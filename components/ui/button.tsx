@@ -9,14 +9,14 @@ import { cn } from "@/lib/utils";
  * brass primary on the storefront and ink primary in the admin (via tokens).
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-sm text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-sm text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:border-transparent disabled:bg-slate-2 disabled:text-fog-3 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-talon-2 active:bg-talon-3",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-fog-2",
+        default: "bg-primary text-primary-foreground hover:bg-talon-2 active:bg-talon-2",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-slate-2",
         outline:
-          "border border-border bg-transparent text-foreground hover:border-foreground hover:bg-transparent",
+          "border border-fog bg-transparent text-foreground hover:border-foreground hover:bg-transparent",
         ghost: "text-foreground hover:bg-muted",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/85",
         link: "h-auto rounded-none p-0 text-foreground underline underline-offset-4 hover:text-primary",

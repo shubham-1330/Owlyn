@@ -1,6 +1,8 @@
 import { Column, Row, Section, Text } from "@react-email/components";
 import * as React from "react";
 
+import { BRAND } from "@/lib/brand";
+
 import { formatINR } from "@/lib/money";
 
 import { emailStyles } from "./layout";
@@ -15,7 +17,7 @@ export function OrderItemsTable({ order }: { order: OrderEmailData }) {
             <Text style={{ margin: 0, fontSize: "14px" }}>
               {item.name}
               <br />
-              <span style={{ color: "#5c636b", fontSize: "13px" }}>
+              <span style={{ color: BRAND.fogText, fontSize: "13px" }}>
                 {item.color} · {item.size} · Qty {item.qty}
               </span>
             </Text>
@@ -42,10 +44,12 @@ export function OrderTotals({ order }: { order: OrderEmailData }) {
     ["Includes GST", formatINR(order.taxTotal)],
   ];
   return (
-    <Section style={{ borderTop: "1px solid #d3d6d2", marginTop: "12px", paddingTop: "8px" }}>
+    <Section
+      style={{ borderTop: `1px solid ${BRAND.hairline}`, marginTop: "12px", paddingTop: "8px" }}
+    >
       {rows.map(([label, value]) => (
         <Row key={label}>
-          <Column style={{ ...emailStyles.tableCell, color: "#5c636b" }}>{label}</Column>
+          <Column style={{ ...emailStyles.tableCell, color: BRAND.fogText }}>{label}</Column>
           <Column style={emailStyles.tableCellRight}>{value}</Column>
         </Row>
       ))}

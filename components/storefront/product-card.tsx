@@ -35,7 +35,7 @@ export function ProductCard({
         <Link
           href={href}
           aria-label={product.name}
-          className="relative block aspect-[3/4] overflow-hidden bg-slate"
+          className="relative block aspect-[3/4] overflow-hidden border border-border bg-slate"
         >
           {first ? (
             <Image

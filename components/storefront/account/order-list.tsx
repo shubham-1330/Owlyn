@@ -49,7 +49,7 @@ export function OrderList({
               {order.preview.map((item, i) => (
                 <div
                   key={i}
-                  className="relative w-10 overflow-hidden border border-background bg-slate"
+                  className="relative w-10 overflow-hidden border border-border bg-slate"
                   style={{ aspectRatio: "3 / 4" }}
                 >
                   {item.image ? (

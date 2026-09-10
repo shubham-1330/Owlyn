@@ -135,7 +135,7 @@ export function ReturnForm({ order }: { order: ReturnableOrder }) {
                     aria-label={`Return ${item.name}, ${item.color}, ${item.size}`}
                   />
                   <div
-                    className="relative w-12 shrink-0 overflow-hidden bg-slate"
+                    className="relative w-12 shrink-0 overflow-hidden border border-border bg-slate"
                     style={{ aspectRatio: "3 / 4" }}
                   >
                     {item.image ? (

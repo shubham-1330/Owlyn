@@ -47,7 +47,7 @@ export function QuickAdd({ product, className }: { product: ProductCardData; cla
           : undefined
       }
       className={cn(
-        "inline-flex size-8 items-center justify-center rounded-sm bg-moon text-ink transition-colors hover:bg-talon focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60",
+        "inline-flex size-8 items-center justify-center rounded-sm border border-fog-2 bg-background text-foreground transition-colors hover:border-talon hover:bg-talon hover:text-moon focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60",
         className,
       )}
     >

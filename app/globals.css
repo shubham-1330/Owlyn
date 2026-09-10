@@ -5,90 +5,87 @@
 /* ------------------------------------------------------------------ */
 /*  Owlyn design tokens                                                */
 /*  Brand palette is fixed (see CLAUDE.md §3). Semantic tokens map     */
-/*  the palette onto surfaces. Storefront is dark-first; the admin     */
-/*  dashboard opts into the light palette with `.theme-admin`.         */
+/*  the palette onto surfaces. The storefront and the admin both sit   */
+/*  on paper; the admin is told apart by its ink sidebar (.surface-ink) */
+/*  and ink primary buttons (.theme-admin).                             */
 /* ------------------------------------------------------------------ */
 
 :root {
-  /* Brand palette */
-  --ink: #0e1116;
-  --slate: #1b2129;
-  --moon: #f3f4f2;
-  --talon: #c79a4b;
-  --dusk: #46407a;
-  --fog: #8b9199;
-  --alert: #c1462f;
+  /* Brand palette (CLAUDE.md §3) */
+  --paper: #f7f6f3;
+  --ink: #17191c;
+  --slate: #e8e6e1;
+  --talon: #8a6a2f;
+  --dusk: #3b3566;
+  --fog: #6b7076;
+  --alert: #a3341f;
 
-  /* Working tints, the few we allow ourselves */
-  --ink-2: #151a21; /* raised surface between ink and slate */
-  --moon-2: #e6e8e4; /* pressed / hover on moon */
-  --talon-2: #d8ad5e; /* talon hover on dark */
-  --talon-3: #9a7333; /* talon on light surfaces (readable at 4.5:1) */
-  --dusk-2: #6d66a8; /* dusk on dark surfaces */
-  --fog-2: #2a313b; /* borders on dark */
-  --fog-3: #d3d6d2; /* borders on light */
-  --fog-4: #5c636b; /* muted text on light (fog itself fails contrast) */
-  --alert-2: #e06a52; /* alert text on dark (alert itself fails contrast) */
+  /* Working tints, the few we allow ourselves. Ratios in scripts/contrast.ts. */
+  --moon: #f3f4f2; /* light text on ink surfaces and over photo scrims */
+  --ink-2: #2a2d33; /* hover on ink surfaces */
+  --slate-2: #dddad3; /* hover / pressed on slate, progress track, disabled controls */
+  --fog-2: #c9c6bf; /* dividers on paper; muted text on ink (10.3:1) */
+  --fog-3: #5a5f65; /* muted text: 5.9:1 on paper and 5.2:1 on slate (fog alone is 4.0 on slate) */
+  --talon-2: #6f5424; /* brass hover (6.5:1 with moon text) */
+  --talon-3: #a8853f; /* brass on ink surfaces */
+  --dusk-2: #524a8a; /* dusk on ink surfaces */
+  --alert-2: #8c2a17; /* error text, 7.9:1 on paper */
 
-  /* Semantic tokens: storefront (dark) */
-  --background: var(--ink);
-  --foreground: var(--moon);
+  /* Semantic tokens: storefront */
+  --background: var(--paper);
+  --foreground: var(--ink);
   --card: var(--slate);
-  --card-foreground: var(--moon);
-  --popover: var(--slate);
-  --popover-foreground: var(--moon);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
   --primary: var(--talon);
-  --primary-foreground: var(--ink);
+  --primary-foreground: var(--moon);
   --secondary: var(--slate);
-  --secondary-foreground: var(--moon);
-  --muted: var(--ink-2);
-  --muted-foreground: var(--fog);
+  --secondary-foreground: var(--ink);
+  --muted: var(--slate-2);
+  --muted-foreground: var(--fog-3);
   --accent: var(--dusk);
   --accent-foreground: var(--moon);
   --destructive: var(--alert);
   --destructive-foreground: var(--moon);
-  --success: #5f9e6e;
+  --success: #2e6b3f;
   --border: var(--fog-2);
-  --input: var(--fog-2);
+  --input: var(--fog);
   --ring: var(--talon);
   --radius: 2px;
-
-  color-scheme: dark;
-}
-
-/* Admin dashboard: light. Applied on the admin layout wrapper. */
-.theme-admin {
-  --background: var(--moon);
-  --foreground: var(--ink);
-  --card: #ffffff;
-  --card-foreground: var(--ink);
-  --popover: #ffffff;
-  --popover-foreground: var(--ink);
-  --primary: var(--ink);
-  --primary-foreground: var(--moon);
-  --secondary: var(--moon-2);
-  --secondary-foreground: var(--ink);
-  --muted: var(--moon-2);
-  --muted-foreground: var(--fog-4);
-  --accent: var(--dusk);
-  --accent-foreground: var(--moon);
-  --destructive: var(--alert);
-  --destructive-foreground: var(--moon);
-  --success: #2f7a44;
-  --border: var(--fog-3);
-  --input: var(--fog-3);
-  --ring: var(--dusk);
 
   color-scheme: light;
 }
 
+/* Admin dashboard: same paper, ink primary and dusk focus so it reads as a different room. */
+.theme-admin {
+  --primary: var(--ink);
+  --primary-foreground: var(--moon);
+  --ring: var(--dusk);
+}
+
+/* Ink surface: the admin sidebar, and anything else set in ink. */
+.surface-ink {
+  --background: var(--ink);
+  --foreground: var(--moon);
+  --muted: var(--ink-2);
+  --muted-foreground: var(--fog-2);
+  --border: #2f333a;
+  --input: #2f333a;
+  --primary: var(--talon-3);
+  --primary-foreground: var(--ink);
+  --ring: var(--talon-3);
+  color-scheme: dark;
+}
+
 @theme inline {
   /* Brand colours as utilities: bg-ink, text-talon, border-fog-2 */
+  --color-paper: var(--paper);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-slate: var(--slate);
+  --color-slate-2: var(--slate-2);
   --color-moon: var(--moon);
-  --color-moon-2: var(--moon-2);
   --color-talon: var(--talon);
   --color-talon-2: var(--talon-2);
   --color-talon-3: var(--talon-3);
@@ -97,7 +94,6 @@
   --color-fog: var(--fog);
   --color-fog-2: var(--fog-2);
   --color-fog-3: var(--fog-3);
-  --color-fog-4: var(--fog-4);
   --color-alert: var(--alert);
   --color-alert-2: var(--alert-2);
 
@@ -186,7 +182,7 @@
 
   ::selection {
     background: var(--talon);
-    color: var(--ink);
+    color: var(--moon);
   }
 
   :focus-visible {
@@ -291,10 +287,10 @@
 
 /* Functional scrims for text legibility over imagery. Not decoration. */
 @utility scrim-b {
-  background: linear-gradient(to top, rgb(14 17 22 / 0.78), rgb(14 17 22 / 0) 65%);
+  background: linear-gradient(to top, rgb(23 25 28 / 0.78), rgb(23 25 28 / 0) 65%);
 }
 @utility scrim-t {
-  background: linear-gradient(to bottom, rgb(14 17 22 / 0.55), rgb(14 17 22 / 0) 100%);
+  background: linear-gradient(to bottom, rgb(23 25 28 / 0.55), rgb(23 25 28 / 0) 100%);
 }
 
 /* Horizontal rails scroll without a visible scrollbar. */

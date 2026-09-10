@@ -116,7 +116,7 @@ export function Gallery({
               aria-label={`${i + 1} of ${media.length}`}
               onMouseMove={i === index ? onMove : undefined}
               onMouseLeave={() => setZoom(null)}
-              className="relative aspect-[3/4] w-full shrink-0 snap-center overflow-hidden bg-slate"
+              className="relative aspect-[3/4] w-full shrink-0 snap-center overflow-hidden border border-border bg-slate"
             >
               {item.kind === "VIDEO" ? (
                 <video

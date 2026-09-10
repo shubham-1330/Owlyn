@@ -10,11 +10,11 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-transparent bg-moon text-ink",
-        brass: "border-transparent bg-talon text-ink",
+        default: "border-transparent bg-ink text-moon",
+        brass: "border-transparent bg-talon text-moon",
         dusk: "border-transparent bg-dusk text-moon",
-        outline: "border-border bg-transparent text-foreground",
-        muted: "border-transparent bg-muted text-muted-foreground",
+        outline: "border-fog bg-background text-foreground",
+        muted: "border-transparent bg-slate-2 text-fog-3",
         alert: "border-transparent bg-alert text-moon",
         success: "border-transparent bg-success text-moon",
       },

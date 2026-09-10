@@ -23,7 +23,7 @@ export function CartDrawer() {
         <Dialog.Overlay className="fixed inset-0 z-50 bg-ink/70 data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-ink text-foreground data-[state=closed]:animate-slide-out-right data-[state=open]:animate-slide-in-right"
+          className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-background text-foreground data-[state=closed]:animate-slide-out-right data-[state=open]:animate-slide-in-right"
         >
           <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-5">
             <Dialog.Title className="font-display text-lg font-bold tracking-tight">
@@ -39,7 +39,7 @@ export function CartDrawer() {
             </Dialog.Title>
             <Dialog.Close
               aria-label="Close bag"
-              className="-mr-2 inline-flex size-10 items-center justify-center rounded-sm hover:bg-moon/10"
+              className="-mr-2 inline-flex size-10 items-center justify-center rounded-sm hover:bg-ink/5"
             >
               <X className="size-5" aria-hidden />
             </Dialog.Close>
@@ -74,7 +74,7 @@ export function CartDrawer() {
           </div>
 
           {view.lines.length > 0 ? (
-            <div className="shrink-0 border-t border-border bg-slate px-5 py-4">
+            <div className="shrink-0 border-t border-border bg-background px-5 py-4">
               <CartSummary cart={view} />
               <div className="mt-4 flex flex-col gap-2">
                 <Button size="lg" asChild>

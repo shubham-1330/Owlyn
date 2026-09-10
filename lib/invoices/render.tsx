@@ -1,6 +1,8 @@
 import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-pdf/renderer";
 import * as React from "react";
 
+import { BRAND } from "@/lib/brand";
+
 /**
  * GST tax invoice. <!-- REVIEW WITH AN ACCOUNTANT --> The layout and the
  * fields follow the common B2C format (seller GSTIN, invoice number and
@@ -56,22 +58,22 @@ export function inr(paise: number): string {
 }
 
 const styles = StyleSheet.create({
-  page: { padding: 36, fontSize: 9, fontFamily: "Helvetica", color: "#0e1116" },
+  page: { padding: 36, fontSize: 9, fontFamily: "Helvetica", color: BRAND.ink },
   row: { flexDirection: "row" },
   headerTitle: { fontSize: 18, fontFamily: "Helvetica-Bold", marginBottom: 2 },
   wordmark: { fontSize: 20, fontFamily: "Helvetica-Bold", letterSpacing: -1 },
-  muted: { color: "#5c636b" },
+  muted: { color: BRAND.fogText },
   block: { marginBottom: 12 },
   label: { fontFamily: "Helvetica-Bold", marginBottom: 2 },
-  table: { marginTop: 10, borderTopWidth: 1, borderColor: "#0e1116" },
+  table: { marginTop: 10, borderTopWidth: 1, borderColor: BRAND.ink },
   th: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderColor: "#0e1116",
+    borderColor: BRAND.ink,
     paddingVertical: 4,
     fontFamily: "Helvetica-Bold",
   },
-  tr: { flexDirection: "row", borderBottomWidth: 0.5, borderColor: "#d3d6d2", paddingVertical: 4 },
+  tr: { flexDirection: "row", borderBottomWidth: 0.5, borderColor: BRAND.hairline, paddingVertical: 4 },
   cName: { width: "34%" },
   cHsn: { width: "10%" },
   cQty: { width: "6%", textAlign: "right" },
@@ -84,7 +86,7 @@ const styles = StyleSheet.create({
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 2 },
   grand: {
     borderTopWidth: 1,
-    borderColor: "#0e1116",
+    borderColor: BRAND.ink,
     marginTop: 4,
     paddingTop: 4,
     fontFamily: "Helvetica-Bold",
@@ -96,7 +98,7 @@ const styles = StyleSheet.create({
     left: 36,
     right: 36,
     fontSize: 7.5,
-    color: "#5c636b",
+    color: BRAND.fogText,
   },
 });
 

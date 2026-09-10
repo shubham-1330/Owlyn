@@ -22,19 +22,19 @@ export function CheckoutSummary({
   const shipping = option ? option.shippingTotal : null;
   const total = option ? option.grandTotal : null;
   return (
-    <div className="flex flex-col gap-5 border border-border bg-slate p-5">
+    <div className="flex flex-col gap-5 border border-border bg-background p-5">
       <h2 className="text-lg">Your bag</h2>
       <ul className="flex flex-col gap-3">
         {cart.lines.map((line) => (
           <li key={line.id} className="flex items-center gap-3">
             <div
-              className="relative w-12 shrink-0 overflow-hidden bg-muted"
+              className="relative w-12 shrink-0 overflow-hidden border border-border bg-slate"
               style={{ aspectRatio: "3 / 4" }}
             >
               {line.image ? (
                 <Image src={line.image.url} alt="" fill sizes="48px" className="object-cover" />
               ) : null}
-              <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-moon text-[11px] font-medium text-ink num">
+              <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-ink text-[11px] font-medium text-moon num">
                 {line.qty}
               </span>
             </div>

@@ -98,7 +98,7 @@ function Panel({ panel }: { panel: MenuPanel }) {
 function Tile({ tile }: { tile: MenuLink }) {
   return (
     <NavigationMenu.Link asChild>
-      <Link href={tile.url} className="group relative block aspect-[4/5] overflow-hidden bg-ink">
+      <Link href={tile.url} className="group relative block aspect-[4/5] overflow-hidden bg-slate">
         {tile.image ? (
           <Image
             src={tile.image}

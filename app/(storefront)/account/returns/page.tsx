@@ -103,7 +103,7 @@ export default async function ReturnsPage({
                 {r.items.map((item, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm">
                     <div
-                      className="relative w-10 shrink-0 overflow-hidden bg-slate"
+                      className="relative w-10 shrink-0 overflow-hidden border border-border bg-slate"
                       style={{ aspectRatio: "3 / 4" }}
                     >
                       {item.image ? (

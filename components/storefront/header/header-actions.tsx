@@ -8,14 +8,14 @@ import { useWishlist } from "@/components/storefront/wishlist/wishlist-provider"
 import { cn } from "@/lib/utils";
 
 const iconButton =
-  "relative inline-flex size-10 items-center justify-center rounded-sm transition-colors hover:bg-moon/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  "relative inline-flex size-10 items-center justify-center rounded-sm transition-colors hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
 
 function Count({ value }: { value: number }) {
   if (value <= 0) return null;
   return (
     <span
       aria-hidden
-      className="absolute top-1 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-xs bg-talon px-1 text-[10px] leading-none font-medium text-ink num"
+      className="absolute top-1 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-xs bg-talon px-1 text-[10px] leading-none font-medium text-moon num"
     >
       {value > 99 ? "99+" : value}
     </span>

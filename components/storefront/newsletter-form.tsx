@@ -35,7 +35,7 @@ export function NewsletterForm({ source = "site" }: { source?: string }) {
           placeholder="you@example.com"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `newsletter-error-${source}` : undefined}
-          className="bg-ink"
+          className="bg-background"
           required
         />
         <Button type="submit" disabled={pending} className="shrink-0">

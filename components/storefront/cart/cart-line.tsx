@@ -11,7 +11,7 @@ import { formatINR } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 const stepButton =
-  "inline-flex size-9 items-center justify-center text-foreground transition-colors hover:bg-moon/10 disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring";
+  "inline-flex size-9 items-center justify-center text-foreground transition-colors hover:bg-ink/5 disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-ring";
 
 export function CartLine({ line, compact = false }: { line: CartLineData; compact?: boolean }) {
   const cart = useCart();
@@ -23,7 +23,7 @@ export function CartLine({ line, compact = false }: { line: CartLineData; compac
       <Link
         href={href}
         className={cn(
-          "relative block shrink-0 overflow-hidden bg-slate",
+          "relative block shrink-0 overflow-hidden border border-border bg-slate",
           compact ? "w-20" : "w-24 sm:w-28",
         )}
         style={{ aspectRatio: "3 / 4" }}

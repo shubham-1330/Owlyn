@@ -181,7 +181,7 @@ async function HomeSectionView({ section, config }: { section: HomeSection; conf
 
 function SectionFallback({ section }: { section: HomeSection }) {
   if (section.key === "hero") {
-    return <div className="-mt-16 min-h-[82svh] bg-slate" aria-hidden />;
+    return <div className="min-h-[78svh] bg-slate" aria-hidden />;
   }
   if (section.key === "newsletter" || section.key === "trust-strip") {
     return <div className="h-48" aria-hidden />;

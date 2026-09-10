@@ -112,7 +112,7 @@ export function WishlistPageView({
           <li key={card.id} className="flex gap-4">
             <Link
               href={`/products/${card.slug}`}
-              className="relative block w-28 shrink-0 overflow-hidden bg-slate"
+              className="relative block w-28 shrink-0 overflow-hidden border border-border bg-slate"
               style={{ aspectRatio: "3 / 4" }}
             >
               {image ? (
