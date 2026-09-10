@@ -1,5 +1,81 @@
 # Progress
 
+## Phase 6: Account area (done)
+
+Authorization is the theme. Every route here reads a resource by id, so every read and write takes the user id into the query itself and treats a miss as "does not exist".
+
+### Ownership in the data layer
+
+- `lib/orders/queries.ts` (`orderExistsForUser`, `getOrderDetailForUser`, `listOrdersForUser`, `getAccountSummary`), `lib/orders/cancel.ts`, `lib/returns/service.ts`, `lib/account/addresses.ts` and `lib/account/profile.tsx` all filter by `userId` inside the Prisma `where`, or check the affected row count, and return null / false / throw `OrderError("NOT_FOUND")` on a miss. Pages turn null into `notFound()`. A logged-in customer requesting another customer's order id, invoice URL, return page or address id gets a 404 with no hint that the id exists.
+- `/api/invoices/[orderId]` reuses `canAccessOrder`: the session owner, or a valid signed guest token from checkout, otherwise 404. Return photos are served by `/api/returns/[requestId]/photos/[index]` to the request owner or staff only.
+- **Real 404 status.** `app/(storefront)/account/orders/[id]/layout.tsx` runs the existence-plus-ownership check above the segment's `loading.tsx`, so an unknown or foreign id is a 404 response, not a streamed 200 with a 404 body. The page below still scopes its own query by user; the layout decides the status code, the query decides the authorisation.
+- The account `layout.tsx` only gates sign-in and draws the nav. It knows nothing about which order or address a page shows.
+
+### Routes
+
+- `/account` — recent orders, order count, default address, wishlist count, open returns.
+- `/account/orders` — paginated (10 per page), status filter and order-number search as a plain GET form so the URL is shareable and works without JavaScript; "Newer / Older" links keep the filters.
+- `/account/orders/[id]` — items from `OrderItem` snapshots (never the live product), payment rows and refunds, shipping and billing snapshots, customer note, invoice download, the timeline Confirmed → Packed → Shipped → Out for delivery → Delivered with the latest `Shipment` courier, AWB and tracking link, customer-visible activity, and the actions the state allows (cancel, return or exchange).
+- `/account/orders/[id]/return` — per-item selection with quantity and a per-item reason, an overall reason code, optional photos, note, and a pickup address prefilled from the delivery snapshot. Items already in a live return are shown but not selectable.
+- `/account/addresses` — add, edit, delete, set default, with pincode auto-fill. Deletion is always allowed because orders carry their own address snapshot; the integration test deletes an address and checks the order's `shippingAddress` JSON is unchanged. Deleting the default promotes the most recently updated address.
+- `/account/profile` — name and phone; password change that requires the current password and signs out every other session; email change that only takes effect after the new address confirms a link.
+- `/account/returns` — every request with status, items, reason, photos count, next step in plain words, and the linked refund when one exists.
+- `/account/wishlist` — Phase 4's page inside the account shell (move to bag, remove, notify-me on sold-out).
+- `/track` — guest lookup by order number plus the email or mobile on the order. Rate limited per IP (10 per 10 minutes). One generic miss message whether the number is wrong, the contact is wrong or the order does not exist.
+- `/verify-email?token=` — confirms an email change; invalid, expired, used and already-taken links each get their own copy.
+
+### Cancellation (`lib/orders/cancel.ts`)
+
+Allowed while the order is CONFIRMED or PACKED, in one transaction with the order row locked: each item's variant is restocked with an `InventoryLog` CANCEL row (and `salesCount` reduced), any live reservation released, the `CouponRedemption` deleted and `Coupon.usedCount` decremented, a `Refund` row created PENDING for the full amount when the order was PAID, the order set CANCELLED with the reason and a customer-visible event, then the cancellation email. **The Razorpay refund API call is a Phase 7 admin action; Phase 6 only creates the PENDING refund row**, and the order page says the refund is queued. Staff will reuse the same function with `source: "staff"`.
+
+### Returns and exchanges (`lib/returns/`)
+
+- Window: `returns.windowDays` from settings (seeded 7), counted from `Order.deliveredAt`; `returnWindow` is pure and unit tested.
+- Quantities: `returnableQuantities` nets every earlier return item whose request is still live (REQUESTED, APPROVED, PICKUP_SCHEDULED, RECEIVED, COMPLETED) against the ordered quantity, so a partial return leaves the remainder returnable and a rejected request gives its units back. The form shows "1 of 2 still returnable" and disables fully returned lines; the service refuses anything over the remainder.
+- The request stores the type, reason code, note, pickup address snapshot, photo storage keys and per-item rows; the order moves to RETURN_REQUESTED from DELIVERED and an acknowledgement email goes out.
+- **Returns never restock.** Stock moves only when staff mark the parcel received (Phase 7).
+
+### Sessions and the password change
+
+- `User.sessionVersion` (new column) rides in the JWT. `lib/auth.ts` re-reads role, ban state and version from the database when a token is older than 30 seconds; a mismatch returns null and the session is gone. Changing the password bumps the version, then calls Auth.js `unstable_update` so the current session's cookie carries the new value, then redirects to the profile with the confirmation. Every other session is signed out within 30 seconds of its next request.
+- Found and fixed while verifying: the edge middleware used to bounce any request carrying a JWT off `/login`, and a stale-but-present cookie looped between `/account` and `/login`. The bounce now lives in the login and register pages, which use the full session check. A stale session lands on the sign-in page.
+- Email change: `User.pendingEmail` plus an `AuthToken` (EMAIL_VERIFY, hashed, 24 hours) sent to the new address. The old email keeps working until the link is used; the change can be cancelled from the profile.
+
+### Shared components
+
+`components/orders/order-status-badge.tsx` (`OrderStatusBadge`, `PaymentStatusBadge`) and `components/orders/order-timeline.tsx` (`OrderTimeline`, vertical or horizontal, optional shipment block) render from status and event data alone, with labels and tones from `lib/orders/status.ts`. `buildTimeline` is pure and unit tested: current step, done steps, a cancelled order frozen at the last step it reached, post-delivery statuses as a terminal marker. The admin can drop both into tables and order pages.
+
+### The cleanup job, answered
+
+- **How it runs:** cron-driven. `vercel.json` calls `GET /api/jobs/cleanup` every five minutes with the `CRON_SECRET` bearer; anywhere else the same route can be hit by any scheduler. It is not request-driven; nothing in checkout triggers it.
+- **Two concurrent runs:** they cannot double-process an order. `abandonUnpaidOrder` takes `SELECT … FOR UPDATE` on the order row and re-checks that it is still PENDING and unpaid before doing anything, so the second run finds CANCELLED and returns false. The reservation release is an `updateMany where releasedAt is null`, which is idempotent. The coupon reversal happens inside the same locked transaction.
+- **A quiet night with no cron:** nothing is cancelled, but nothing is blocked either. Availability at checkout and at capture is stock minus reservations whose `expiresAt` is still in the future, so an expired reservation stops holding stock the moment its TTL passes, cleanup or not. What waits for the next run is bookkeeping: `releasedAt` on the reservation rows, the order flipping to CANCELLED, and the coupon use coming back. A late webhook in that gap captures normally (stock permitting) rather than being parked, which is the better outcome for the customer.
+
+### Tests
+
+- Unit (`pnpm test`, 79): timeline derivation and cancellability, return window boundaries and returnable quantities, plus the two new email templates.
+- Integration (`pnpm test:integration`, 18): customer B's id is missing for customer A across order detail, order list, cancel and returns; cancelling a COD order restocks with CANCEL rows, frees a single-use coupon (a second order then succeeds with it) and creates no refund; cancelling a captured prepaid order restocks and queues a PENDING refund; a shipped order cannot be cancelled and nothing is restocked; a partial return of 1 of 3 leaves 2 returnable, an over-request is refused, the remaining 2 go through as an exchange, and stock never moves; a closed window and a foreign user are refused; deleting an address keeps the order snapshot and promotes a new default; tracking matches on email (any case) or a +91 phone and misses otherwise; the password change rejects a wrong current password, stores the new hash and bumps the version.
+- `tests/integration/demo-orders.test.ts` is a fixture builder, skipped unless `DEMO_ORDERS=1`, that gives Asha a cancellable order, a delivered order and a shipped order and creates Ravi Menon (customer B) with one order for manual checks.
+
+### Verified in a real browser against the production build
+
+- Signed in as Asha (customer A): fetching Ravi's order page, invoice URL and return page from her session all returned HTTP 404, as did a made-up id; her own returned 200. Navigating to Ravi's order rendered the 404 page with a 404 status.
+- Cancelled her CONFIRMED COD order with FLAT300: the page showed Cancelled, the timeline froze at Confirmed with a "Cancelled" marker, the activity read "Cancelled by you. Ordered by mistake". Database: variant stock 36 → 37, InventoryLog CANCEL +1 next to the SALE −1, FLAT300 `usedCount` 1 → 0, redemption row gone, no refund row, cancellation email in the outbox.
+- Raised a return for 1 of 2 Hush Court 1 Low on the delivered order: the returns page listed it as Requested; reopening the form showed "1 of 2 still returnable" and the other line untouched; the order became RETURN_REQUESTED, no inventory row was written, the acknowledgement email went out.
+- Opened a second session with curl, changed the password in the browser: the browser session stayed signed in and landed on the profile with the confirmation; the second session's next request was redirected to sign-in and `/api/auth/session` returned null. A signed-in visit to `/login` bounces to `/account`; a stale cookie lands on `/login` without looping.
+- Address book: make default moved the badge and the overview's default address; add, edit and delete open in a modal with pincode auto-fill.
+- Orders list: `?status=CANCELLED` and `?q=000131` filter correctly with the empty state for no matches.
+- `/track` with the right order number and a wrong email: the generic message. With `+91 98765 43210`: the shipped order, its Bluedart AWB and the timeline at Shipped.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:integration` and `pnpm build` pass.
+
+### Decisions and gaps
+
+- Cancelling a COD order leaves `paymentStatus` PENDING (there is no "void" state) and the page says "not collected"; nothing was charged.
+- The return photo upload writes files before the transaction; a request that then fails leaves orphan files under `storage/returns/`, which is cheaper than a half-written request. A sweep can come with the storage driver work.
+- Exchanges record the wanted size in the note; staff pick the replacement variant when approving (Phase 7).
+- Email change leaves the JWT's email stale until the next sign-in; account pages read the email from the database, so nothing shown is wrong.
+- The 30-second session re-check is one indexed primary-key read per `auth()` call once the interval passes; it can be shortened or lengthened in `lib/auth.ts`.
+
 ## Phase 5: Checkout & payments (done)
 
 Money moves here, so every rupee is computed once, server-side, by `lib/pricing.priceCart`. The client sends an address, a shipping rate id and a payment method; it never sends a price, and the invariant throw in the pricing engine stays live in production.
@@ -71,6 +147,10 @@ If the money arrived but the order cannot be fulfilled (stock gone, amount misma
 - `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:integration`, `pnpm test:e2e` (Chrome channel) and `pnpm build` pass.
 
 ### Conflicts flagged and calls made
+
+BLOCKER (deferred): Razorpay never tested against live test-mode keys.
+Payload shape, retry/idempotency and failed-then-retried payment are
+unverified. Must be cleared before any real traffic. Owner: Phase 9.
 
 - **No Razorpay credentials in this environment.** The test-card and close-the-tab manual checks could not be run. Instead the same code paths were exercised with locally signed payloads (integration tests and curl), and the Playwright Razorpay test is gated on the keys. With keys, `RAZORPAY_WEBHOOK_SECRET` must be set or every delivery is rejected.
 - **CLAUDE.md marks PAID after a verified client signature; the Phase 5 brief makes the webhook the source of truth.** Both are honoured by one idempotent capture: the callback verifies the signature, then confirms the amount and captured status against Razorpay's API before calling the same function the webhook calls. Whichever arrives first wins; the other is a no-op.
@@ -155,9 +235,15 @@ Header with mega menu, drawer and search; home page from `HomepageSection` and `
 
 Next.js 15.5, React 19, Tailwind v4 tokens, shadcn on Radix restyled, Archivo and Inter Tight, tooling, Postgres on port 5436.
 
-## Sequencing note for Phase 6
+## Handover to Phase 7 (Admin dashboard)
 
-Phase 6 (account area: orders, cancellations, returns, invoices, tracking) was requested while Phase 4 was mid-build and deferred until Phase 5 existed. Real orders now come from checkout, `getOrderForCustomer` / `canAccessOrder` in `lib/orders/queries.ts` already decide ownership in the data layer (owner session or signed guest token, otherwise null, which pages turn into a 404), and the invoice route uses them. Phase 6 builds `/account/*` and `/track` on top of those, adds cancellation with restock and coupon reversal, and return requests. The Razorpay refund API call for cancelled prepaid orders stays a Phase 7 admin action; Phase 6 only creates the PENDING refund row.
+What the admin picks up from Phases 5 and 6:
+
+- `Refund` rows sitting PENDING (customer cancellations of paid orders, and orders parked with `needsReview`) need the Razorpay refund call and a status update; `refund.processed` on the webhook already closes the loop.
+- Return requests need approve / reject / pickup booked / received; marking received is where restocking happens (InventoryLog RETURN) and where an exchange picks its replacement variant.
+- Status transitions to PACKED, SHIPPED (with a `Shipment` row), OUT_FOR_DELIVERY and DELIVERED (set `deliveredAt`, which opens the return window) should send the emails that already exist in `emails/order-status.tsx`.
+- `cancelOrder` accepts `source: "staff"` and an actor id; `OrderStatusBadge`, `PaymentStatusBadge` and `OrderTimeline` render from data alone and are ready for admin tables and order pages.
+- Every admin mutation must check the role server-side and write an `AuditLog` row.
 
 ## Known gaps
 
@@ -167,5 +253,6 @@ Phase 6 (account area: orders, cancellations, returns, invoices, tracking) was r
 - The invoice template and the place-of-supply rule (shipping state for B2C) need an accountant's review before launch; the store GSTIN is empty in the seed and prints as "Pending registration".
 - Back-in-stock and coupon emails wait for their triggers.
 - Review submission waits for Phase 8.
-- `/track` links in the drawer and footer are a Phase 6 route.
-- The demo database holds one support ticket, one newsletter subscriber, one back-in-stock request, Asha's merged cart, and the COD order `OWL-2026-000074` from the Phase 5 browser check (its invoice is in `storage/`, its email in `.dev-outbox/`).
+- Return photos are written before the request's transaction; a request that then fails leaves orphan files under `storage/returns/` until a sweep exists.
+- Exchanges record the wanted size in the customer's note; the replacement variant is chosen by staff when approving (Phase 7).
+- The demo database holds one support ticket, one newsletter subscriber, one back-in-stock request, the COD order `OWL-2026-000074` from the Phase 5 browser check, and the Phase 6 fixtures from `DEMO_ORDERS=1`: Ravi Menon (customer B, `ravi.menon@example.com` / `owlyn-demo-2026`) with one order, and Asha's cancelled, delivered-with-a-return and shipped orders. Asha's password was changed during the browser check; re-run `pnpm db:seed` to restore `owlyn-demo-2026`.

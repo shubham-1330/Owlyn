@@ -105,16 +105,20 @@ app/
   globals.css           Design tokens, motion tokens, base styles
   layout.tsx            Root layout, fonts, metadata
   not-found.tsx         404 page
-  (auth)/               Login and register pages plus their server actions
-  (storefront)/         Header + footer layout, home, /collections/[slug], /products/[slug], /search, /pages/[slug], /cart, /wishlist, /account
+  (auth)/               Login, register and verify-email pages plus their server actions
+  (storefront)/         Header + footer layout, home, /collections/[slug], /products/[slug], /search, /pages/[slug], /cart, /wishlist, /track
     checkout/           Three-step checkout, its server actions, and /checkout/success/[orderId]
+    account/            Account shell and nav; overview, orders (list, detail, return form), returns, addresses, profile, wishlist
+    track/              Guest order tracking
   admin/                Admin dashboard, light theme, staff-only
   api/auth/             Auth.js route handler
   api/webhooks/razorpay Razorpay webhook (signature check, idempotent)
   api/jobs/cleanup      Reservation and stale-order cleanup (cron)
   api/invoices/[orderId] Invoice PDF download, ownership checked in the data layer
+  api/returns/          Return photos, served to the request owner or staff
 components/
   ui/                   shadcn primitives restyled to Owlyn
+  orders/               OrderStatusBadge, PaymentStatusBadge and OrderTimeline, shared by the account area and the admin
   forms/                Field and message helpers shared by forms
   storefront/           Header, footer, product card and rail, home sections, Markdown, breadcrumbs
     plp/                Filters, chips, sort, grid with load more, pagination
@@ -122,6 +126,7 @@ components/
     cart/               Cart provider, drawer, lines, summary, coupon form, shipping bar, quick add
     wishlist/           Wishlist provider, heart button, wishlist page view
     checkout/           Checkout steps, address fields, summary, Razorpay loader, success page helper
+    account/            Account nav, order list, cancel dialog, return form, address book, profile forms
   seo/                  JSON-LD helper
   admin/                Admin components (Phase 7)
 hooks/                  Client hooks (recent searches)
@@ -134,7 +139,9 @@ lib/
   pricing/              Pure pricing engine: lines, coupons, shipping, tax, totals (unit tested)
   cart/                 Cart cookies, cached read model, mutations and the login merge
   wishlist/             Wishlist service
-  orders/               Order creation, payment capture, cleanup, tax split, order numbers, guest access tokens, customer reads
+  orders/               Order creation, payment capture, cleanup, cancellation, tax split, order numbers, guest access tokens, status vocabulary and timeline, customer reads, guest tracking
+  returns/              Return window and quantity rules (pure) and the return request service
+  account/              Address book and profile services (password change, email change)
   payments/             Razorpay SDK wrapper and webhook processing
   invoices/             GST invoice data and PDF rendering
   email/                Send through Resend or the local outbox
@@ -183,6 +190,8 @@ Reads go through `lib/queries/` and are cached with tags, so a publish can call 
 - Every protected page calls a guard from `lib/auth/guards.ts`. Middleware is a convenience, not the check.
 - Order totals come from `lib/pricing.priceCart` and nowhere else. Checkout, the shipping quote and order creation all call it; the client sends ids and quantities only.
 - An order is paid when `capturePayment` says so, whether the webhook or the verified browser callback got there first. It is idempotent on the provider payment id.
+- Ownership is decided inside each query and action (`where: { id, userId }`), never in middleware or a layout. A miss is a 404, so ids never leak. Dynamic account segments check existence in a `layout.tsx` above their loading boundary so the 404 is a real status code.
+- A password change bumps `User.sessionVersion`; sessions re-read it every 30 seconds and a mismatch signs them out.
 
 ## Progress
 
