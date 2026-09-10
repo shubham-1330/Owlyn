@@ -38,4 +38,6 @@ vi.mock("@/lib/orders/after", () => ({
   afterOrderConfirmed: async () => undefined,
   notifyOrderNeedsReview: async () => undefined,
   orderEmailData: async () => null,
+  sendOrderCancelledEmail: async () => undefined,
+  sendReturnRequestedEmail: async () => undefined,
 }));
